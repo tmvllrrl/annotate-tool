@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+   	<head>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+      	<title>Annotation Tool</title>
+
+   
+		<script src="predictions.js">
+
+		// loads the array of images, with their predicted labels according to a Machine Learning algorithm: in this case, it's the output of a tensorFlow model that predicts ImageNet labels.
+
+		//The array looks like this:
+		// var images = [['030ae82b1f6feacc14d431248a627dc.jpg', 'packet', 0.66888225, [['packet', 0.66888225], ['matchstick', 0.098503083], ['carton', 0.067100592], ['pencil box, pencil case', 0.041079309], ['book jacket, dust cover, dust jacket, dust wrapper', 0.023718819]]],['03cd8b3b89027a1867bb05dc112b2c.jpg', 'vulture', 0.19094709, [['vulture', 0.19094709], ['wing', 0.1111501], ['warplane, military plane', 0.094249904], ['kite', 0.041520867], ['bald eagle, American eagle, Haliaeetus leucocephalus', 0.033858865]]],['05810e4e3535556aa3a7ea92b374e0.jpg', 'candle, taper, wax light', 0.079653569, [['candle, taper, wax light', 0.079653569], ['container ship, containership, container vessel', 0.057309043], ['wreck', 0.055132806], ['tow truck, tow car, wrecker', 0.038218945], ['spotlight, spot', 0.034531102]]],['06b4793e723e0ade7a5da13117e4b.jpg', 'organ, pipe organ', 0.13145885, [['organ, pipe organ', 0.13145885], ['wall clock', 0.11327242], ['nail', 0.096524686], ['screw', 0.055117268], ['face powder', 0.045105647]]]];
+
+		// For each array element, it contains the following:
+		//    0. Name of the file. In the first entry above: '030ae82b1f6feacc14d431248a627dc.jpg'
+		//    1. The most confident label.  In the first entry above: 'packet'
+		//    2. The confidence of the label.  So, in the first entry above, the Machine Learning model was '0.66888225' confident that the image contains a 'packet'.
+		//    3. A list of the top 5 predictions for the image. So, in the first entry above, the Machine Learning algorithm was 66.9% confident that the image contained a packet, 9.9% confident that it contained  a matchstick, 6.7% confident that image contained a carton, etc. 
+
+		</script>    
+
+		<script>
+
+			var current_image = -1;
+			var classImageState = 0;
+
+			var correctAnnotations = {};
+			var incorrectAnnotations = {};
+			var unclearAnnotations = {};
+
+			var imageLabels = {};
+
+			function updateImageQuestion(image, label) {
+				document.getElementById('image_to_classify').src = 'raw_data/'+image; 
+				document.getElementById('image_prediction').innerHTML = label.toUpperCase();
+				document.getElementById('image_number').innerHTML = String(current_image + 1);
+			}
+
+			// Load next image from array and setup annotation scheme
+			function nextImage() {
+				if(current_image + 1 < images.length){
+					current_image++;	
+					image = images[current_image][0];
+					label = images[current_image][1];
+					updateImageQuestion(image, label);
+
+					// Assume the image annotation is correct and setup accordingly
+					document.getElementById("class-image").style.border = "10px solid green";
+					classImageState = 0;
+	
+					// Assign the file name with the annotation as if it was correct to start with
+					correctAnnotations[images[current_image][0]] = images[current_image][1];
+					delete incorrectAnnotations[images[current_image][0]];
+					delete unclearAnnotations[images[current_image][0]];
+
+					// Following block saves labels with corresponding image
+					// Don't save label when initially loading the image 
+					if (current_image != 0) {
+						// Get labels and save with corresponding image
+						var fluidType = document.getElementById("fluid-type").value;
+						var docConf = document.getElementById("doc-conf").value;
+
+						// Only save if something in fields; avoids errors when jumping to image
+						if (fluidType) {
+							imageLabels[images[current_image-1][0]] = [fluidType, docConf];
+						}
+						
+						// Clear input field
+						document.getElementById("fluid-type").value = "";
+					}
+				}
+
+				// outputAnnotations();
+				displayAnnotations();
+				displayLabels();
+
+				if (current_image != 0 && current_image % 10 == 0) {
+					downloadAnnotations();
+				}
+				
+			}
+
+			// Display the labels
+			function displayLabels() {
+				for (var image in imageLabels) {
+					var fluidType = imageLabels[image][0];
+					var docConf = imageLabels[image][1];
+
+					document.getElementById("display-labels").innerHTML += image;
+					document.getElementById("display-labels").innerHTML += ": ";
+					document.getElementById("display-labels").innerHTML += fluidType + ", " + docConf;
+					document.getElementById("display-labels").innerHTML += "<br>";
+				}
+			}
+
+			// Display the annotations
+			function displayAnnotations(){
+				// Show annotation HTML elements
+				document.getElementById("correct-box").style.display = "block";
+				document.getElementById("incorrect-box").style.display = "block";
+				document.getElementById("unclear-box").style.display = "block";
+
+				// Clear results
+				document.getElementById("correct").innerHTML = "";
+				document.getElementById("incorrect").innerHTML = "";
+				document.getElementById("unclear").innerHTML = "";
+
+				var i = 0;
+				for (var image in correctAnnotations) {
+					// Avoid printing the last element since that will always be the current image
+					i++;
+					if (i == Object.keys(correctAnnotations).length) {
+						break;
+					}
+
+					var label = correctAnnotations[image];
+					document.getElementById('correct').innerHTML += image;
+					document.getElementById('correct').innerHTML += ': ';
+					document.getElementById('correct').innerHTML += label;
+					document.getElementById('correct').innerHTML += '<br>';
+
+				}
+
+				for (var image in incorrectAnnotations) {
+					var label = incorrectAnnotations[image];
+					document.getElementById('incorrect').innerHTML += image;
+					document.getElementById('incorrect').innerHTML += ': ';
+					document.getElementById('incorrect').innerHTML += label;
+					document.getElementById('incorrect').innerHTML += '<br>';
+				}
+
+				for (var image in unclearAnnotations) {
+					var label = unclearAnnotations[image];
+					document.getElementById('unclear').innerHTML += image;
+					document.getElementById('unclear').innerHTML += ': ';
+					document.getElementById('unclear').innerHTML += label;
+					document.getElementById('unclear').innerHTML += '<br>';
+				}
+			}
+
+			function switchState() {
+				// Image is in correct annotation state
+				if (classImageState == 0) {
+					document.getElementById("class-image").style.border = "10px solid red";
+					classImageState = 1;
+
+					incorrectAnnotations[images[current_image][0]] = images[current_image][1];
+					delete correctAnnotations[images[current_image][0]];
+					delete unclearAnnotations[images[current_image][0]];
+				}
+				// Image is in incorrect annotation state
+				else if (classImageState == 1) {
+					document.getElementById("class-image").style.border = "10px solid gold";
+					classImageState = 2;
+
+					unclearAnnotations[images[current_image][0]] = images[current_image][1];
+					delete correctAnnotations[images[current_image][0]];
+					delete incorrectAnnotations[images[current_image][0]];
+				}
+				// Image is in unclear annotation state
+				else {
+					document.getElementById("class-image").style.border = "10px solid green";
+					classImageState = 0;
+
+					correctAnnotations[images[current_image][0]] = images[current_image][1];
+					delete incorrectAnnotations[images[current_image][0]];
+					delete unclearAnnotations[images[current_image][0]];
+				}
+
+				// outputAnnotations();
+				
+			}
+
+			function outputAnnotations() {
+				console.log(correctAnnotations);
+				console.log(incorrectAnnotations);
+				console.log(unclearAnnotations);
+				console.log(imageLabels);
+			}
+
+			function download(content, fileName, contentType) {
+				var a = document.createElement("a");
+				var file = new Blob([JSON.stringify(content)], {type: contentType});
+				a.href = URL.createObjectURL(file);
+				a.download = fileName;
+				a.click();
+			}
+
+			function downloadAnnotations() {
+				// download(correctAnnotations, 'correct.txt', 'text/plain');
+				// download(incorrectAnnotations, 'incorrect.txt', 'text/plain');
+				// download(unclearAnnotations, 'unclear.txt', 'text/plain');
+				download(imageLabels, 'labels.txt', 'text/plain');
+			}
+
+			function jumpToImage() {
+				var imageIndex = document.getElementById("image-index").value;
+				if (imageIndex < 1 || imageIndex > images.length) {
+
+				}
+				else {
+					// Subtracting by 2 b/c of zero indexing and nextImage auto increments by 1
+					current_image = imageIndex - 2;
+					nextImage();
+				}
+				
+			}
+
+			document.addEventListener('DOMContentLoaded', function() {
+				nextImage();
+			}, false);
+
+		</script>    
+   	</head>
+	
+<body>
+	<div class="container">
+		<br>
+
+		<p style="font-size: x-large;">
+			Image # <span id="image_number"></span>
+			<br>
+			
+			<div class="row">
+				<p></p>
+				<div class="col-sm">
+					<button id="class-image" onclick="switchState()">
+						<img src="" id="image_to_classify" style="width: 300px;">
+					</button>
+				</div>
+				<div class="col-sm" style="font-size: x-large; background-color: #c1c6fc; border-radius: 5px; height: fit-content;">
+					Instructions:
+					<br>
+					Click on image to change border to correct classification.
+					<br><br>
+					Border Legend:
+					<br>
+					<span style="color: green; font-size: x-large;">■</span> Correct
+					<br>
+					<span style="color: red; font-size: x-large;">■</span> Incorrect
+					<br>
+					<span style="color: gold; font-size: x-large;">■</span> Unclear
+
+				</div>
+				<p></p>
+			</div>
+			
+		</p>
+		
+		<p style="font-size: x-large;">
+			Predicted Label: <span id="image_prediction" style="font-family: 'Times New Roman', Times, serif;"></span>
+			<br>
+		</p>
+
+		<p style="font-size: x-large;">
+			Fluid Type: <input type="text" id="fluid-type">
+		</p>
+
+		<p style="font-size: x-large;">
+			Doctor Confidence: 
+			<select type="text" id="doc-conf">
+				<option value="low">Low</option>
+				<option value="medium">Medium</option>
+				<option value="high">High</option>
+			</select>
+		</p>
+		
+		<p>
+			<button onclick="nextImage()">Next Image</button>
+			<button onclick="jumpToImage()">Jump to Image</button>
+			<input type="number" id="image-index" placeholder="Enter image number">
+		</p>
+
+		<p>
+			Labels:
+			<br>
+			<p id="display-labels"></p>	
+		</p>
+
+		<div class="row">
+			<div class="col-sm" id="correct-box" style="display: none;">
+				<p>Correct Predictions:</p>
+				<p id="correct"></p>
+			</div>
+			<div class="col-sm" id="incorrect-box" style="display: none;">
+				<p>Incorrect Predictions:</p>
+				<p id="incorrect"></p>
+			</div>
+			<div class="col-sm" id="unclear-box" style="display: none;">
+				<p>Unclear Predictions:</p>
+				<p id="unclear"></p>
+			</div>
+		</div>
+	</div>
+	
+
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+
+

@@ -96,6 +96,11 @@
 
 			// Display the annotations
 			function displayAnnotations(){
+				// Show annotation HTML elements
+				document.getElementById("correct-box").style.display = "block";
+				document.getElementById("incorrect-box").style.display = "block";
+				document.getElementById("unclear-box").style.display = "block";
+
 				// Clear results
 				document.getElementById("correct").innerHTML = "";
 				document.getElementById("incorrect").innerHTML = "";
@@ -273,20 +278,17 @@
 			<p id="display-labels"></p>	
 		</p>
 
-		<p>
-			Annotations: <br>
-		</p>
 		<div class="row">
-			<div class="col-sm" style="background-color: green;">
-				<p>Correct</p>
+			<div class="col-sm" id="correct-box" style="display: none;">
+				<p>Correct Predictions:</p>
 				<p id="correct"></p>
 			</div>
-			<div class="col-sm">
-				<p>Incorrect</p>
+			<div class="col-sm" id="incorrect-box" style="display: none;">
+				<p>Incorrect Predictions:</p>
 				<p id="incorrect"></p>
 			</div>
-			<div class="col-sm">
-				<p>Unclear</p>
+			<div class="col-sm" id="unclear-box" style="display: none;">
+				<p>Unclear Predictions:</p>
 				<p id="unclear"></p>
 			</div>
 		</div>
