@@ -2,7 +2,7 @@
 <html>
    	<head>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-      	<title>Classify Image</title>
+      	<title>Annotation Tool</title>
 
    
 		<script src="predictions.js">
@@ -54,23 +54,26 @@
 					delete incorrectAnnotations[images[current_image][0]];
 					delete unclearAnnotations[images[current_image][0]];
 
-					// Following block saves label with corresponding image
+					// Following block saves labels with corresponding image
 					// Don't save label when initially loading the image 
 					if (current_image != 0) {
-						// Get image label and save with corresponding image
-						var imageLabel = document.getElementById("image-label").value;
-						// Only save if something in field; avoids errors when jumping to image
-						if (imageLabel) {
-							imageLabels[images[current_image-1][0]] = imageLabel;
+						// Get labels and save with corresponding image
+						var fluidType = document.getElementById("fluid-type").value;
+						var docConf = document.getElementById("doc-conf").value;
+
+						// Only save if something in fields; avoids errors when jumping to image
+						if (fluidType) {
+							imageLabels[images[current_image-1][0]] = [fluidType, docConf];
 						}
 						
 						// Clear input field
-						document.getElementById("image-label").value = "";
+						document.getElementById("fluid-type").value = "";
 					}
 				}
 
-				outputAnnotations();
-				displayResults();
+				// outputAnnotations();
+				displayAnnotations();
+				displayLabels();
 
 				if (current_image != 0 && current_image % 10 == 0) {
 					downloadAnnotations();
@@ -78,8 +81,21 @@
 				
 			}
 
-			// display the results
-			function displayResults(){
+			// Display the labels
+			function displayLabels() {
+				for (var image in imageLabels) {
+					var fluidType = imageLabels[image][0];
+					var docConf = imageLabels[image][1];
+
+					document.getElementById("display-labels").innerHTML += image;
+					document.getElementById("display-labels").innerHTML += ": ";
+					document.getElementById("display-labels").innerHTML += fluidType + ", " + docConf;
+					document.getElementById("display-labels").innerHTML += "<br>";
+				}
+			}
+
+			// Display the annotations
+			function displayAnnotations(){
 				// Clear results
 				document.getElementById("correct").innerHTML = "";
 				document.getElementById("incorrect").innerHTML = "";
@@ -147,7 +163,7 @@
 					delete unclearAnnotations[images[current_image][0]];
 				}
 
-				outputAnnotations();
+				// outputAnnotations();
 				
 			}
 
@@ -167,9 +183,10 @@
 			}
 
 			function downloadAnnotations() {
-				download(correctAnnotations, 'correct.txt', 'text/plain');
-				download(incorrectAnnotations, 'incorrect.txt', 'text/plain');
-				download(unclearAnnotations, 'unclear.txt', 'text/plain');
+				// download(correctAnnotations, 'correct.txt', 'text/plain');
+				// download(incorrectAnnotations, 'incorrect.txt', 'text/plain');
+				// download(unclearAnnotations, 'unclear.txt', 'text/plain');
+				download(imageLabels, 'labels.txt', 'text/plain');
 			}
 
 			function jumpToImage() {
@@ -197,14 +214,31 @@
 		<br>
 
 		<p style="font-size: x-large;">
-			Image #: <span id="image_number"></span>
+			Image # <span id="image_number"></span>
 			<br>
-			Border Legend: <font color="green">Correct</font>, <font color="red">Incorrect</font>, <font color="gold">Unclear</font>
-			<br>
+			
+			<div class="row">
+				<div class="col-sm">
+					<button id="class-image" onclick="switchState()">
+						<img src="" id="image_to_classify" style="width: 300px;">
+					</button>
+				</div>
+				<div class="col-sm" style="font-size: x-large;">
+					Instructions:
+					<br>
+					Click on image to change border to correct classification.
+					<br><br>
+					Border Legend:
+					<br>
+					<span style="color: green; font-size: x-large;">■</span> Correct
+					<br>
+					<span style="color: red; font-size: x-large;">■</span> Incorrect
+					<br>
+					<span style="color: gold; font-size: x-large;">■</span> Unclear
 
-			<button id="class-image" onclick="switchState()">
-				<img src="" id="image_to_classify" style="width: 300px;">
-			</button>
+				</div>
+			</div>
+			
 		</p>
 		
 		<p style="font-size: x-large;">
@@ -212,10 +246,19 @@
 			<br>
 		</p>
 
-		<p>
-			Image Label: <input type="text" id="image-label" placeholder="Enter image label">
+		<p style="font-size: x-large;">
+			Fluid Type: <input type="text" id="fluid-type">
 		</p>
 
+		<p style="font-size: x-large;">
+			Doctor Confidence: 
+			<select type="text" id="doc-conf">
+				<option value="low">Low</option>
+				<option value="medium">Medium</option>
+				<option value="high">High</option>
+			</select>
+		</p>
+		
 		<p>
 			<button onclick="nextImage()">Next Image</button>
 			<button onclick="jumpToImage()">Jump to Image</button>
@@ -223,7 +266,13 @@
 		</p>
 
 		<p>
-			Results: <br>
+			Labels:
+			<br>
+			<p id="display-labels"></p>	
+		</p>
+
+		<p>
+			Annotations: <br>
 		</p>
 		<div class="row">
 			<div class="col-sm">
