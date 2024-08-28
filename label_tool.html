@@ -2,7 +2,7 @@
 <html>
    	<head>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-      	<title>Annotation Tool</title>
+      	<title>Label Tool</title>
 
    
 		<script src="predictions.js">
@@ -67,6 +67,7 @@
 				
 			}
 
+			// Resets fields to be none to allow validity checks work as expected
 			function resetLabelFields() {
 				document.getElementById("fluid-type").value = "none";
 				document.getElementById("doc-conf").value = "none";
@@ -107,14 +108,13 @@
 			function jumpToImage() {
 				var imageIndex = document.getElementById("image-index").value;
 				if (imageIndex < 1 || imageIndex > images.length) {
-
+					// If not valid index, do nothing
 				}
 				else {
 					// Subtracting by 2 b/c of zero indexing and nextImage auto increments by 1
 					currentImage = imageIndex - 2;
 					nextImage();
 				}
-				
 			}
 
 			// Return to previous image; in case of an accident with a label
@@ -123,7 +123,6 @@
 					currentImage = currentImage - 2;
 					nextImage();	
 				}
-				
 			}
 
 			document.addEventListener('DOMContentLoaded', function() {
@@ -204,8 +203,6 @@
 				<p id="display-labels"></p>	
 			</p>
 		</div>
-		
-
 	</div>
 	
 
