@@ -28,8 +28,8 @@
 			var imageLabels = {};
 
 			function updateImageQuestion(image) {
-				document.getElementById('image_to_classify').src = 'raw_data/'+image; 
-				document.getElementById('image_number').innerHTML = String(currentImage + 1);
+				document.getElementById('image-to-classify').src = 'raw_data/'+image; 
+				document.getElementById('image-number').innerHTML = String(currentImage + 1);
 			}
 
 			// Load next image from array and setup annotation scheme
@@ -134,47 +134,46 @@
    	</head>
 	
 <body>
-	<div class="container">
+	<div class="container" style="font-size: large;">
 		<br>
 
-		<p style="font-size: large;">
-			Image # <span id="image_number"></span>
+		<p>
+			Image # <span id="image-number"></span>
 			<br>
 
-			<button onclick="previousImage()" style="font-size: small; border-radius: 2px;">Previous Image</button>
-			<button onclick="jumpToImage()" style="font-size: small;">Jump to Image</button>
+			<button onclick="previousImage()" style="font-size: small; border-radius: 3px;">Previous Image</button>
+			<button onclick="jumpToImage()" style="font-size: small; border-radius: 3px;">Jump to Image</button>
 			<input type="number" id="image-index" placeholder="Enter image number" style="font-size: small;">
-			
-			<div class="row">
-				<p></p>
-				<div class="col-sm">
-					<img src="" id="image_to_classify" style="height: 350px;">
-				</div>
-				<div class="col-sm" style="font-size: large; background-color: #c1c6fc; border-radius: 5px; height: 350px; margin-right: 15px;">
-					<b>Instructions:</b>
-					<br>
-					Enter the correct labels for the provided image.
-					<br>
-					Tips:
-					<br>
-
-					<li>Cannot go to next image until all labels are not "None."</li>
-					<li>Each field has a dropdown menu for easy selection and typing will autofill label.</li>
-					<li>We recommend using tab to get to the different labels quickly.</li>
-					<br>
-
-					Labels done so far will show up at the bottom with a number indicating
-					how many images labeled so far.
-					<br>
-					Can jump to a particular image to resume progress.
-
-				</div>
-				<p></p>
-			</div>
-			
 		</p>
+			
+		<div class="row">
+			<p></p>
+			<div class="col-sm">
+				<img src="" id="image-to-classify" style="height: 350px;">
+			</div>
+			<div class="col-sm" style="font-size: large; background-color: #c1c6fc; border-radius: 5px; height: 350px; margin-right: 15px;">
+				<b>Instructions:</b>
+				<br>
+				Enter the correct labels for the provided image.
+				<br>
+				Tips:
+				<br>
 
-		<p style="font-size: large;">
+				<li>Cannot go to next image until all labels are not "None."</li>
+				<li>Each field has a dropdown menu for easy selection and typing will autofill label.</li>
+				<li>We recommend using tab to get to the different labels quickly.</li>
+				<br>
+
+				Labels done so far will show up at the bottom with a number indicating
+				how many images labeled so far.
+				<br>
+				Can jump to a particular image to resume progress.
+			</div>
+		</div>
+		
+		<p></p>
+
+		<p>
 			Fluid Type:
 			<select type="text" id="fluid-type">
 				<option value="none">None</option>
@@ -183,7 +182,7 @@
 			</select>
 		</p>
 
-		<p style="font-size: large;">
+		<p>
 			Doctor Confidence: 
 			<select type="text" id="doc-conf">
 				<option value="none">None</option>
@@ -194,15 +193,15 @@
 		</p>
 		
 		<p>
-			<button onclick="nextImage()">Next Image</button>
-			<button onclick="downloadLabels()" style="margin-left: 48px;">Download Labels</button>
+			<button onclick="nextImage()" style="border-radius: 3px;">Next Image</button>
+			<button onclick="downloadLabels()" style="margin-left: 48px; border-radius: 3px;">Download Labels</button>
 		</p>
 
 		<div class="container" style="background-color: #bee3ba; min-height: 300px; border-radius: 5px;">
-			<p style="font-size: large;">
+			<p>
 				<b>Labels (<span id="label-count"></span>): </b>
 				<br>
-				<p style="font-size: large;" id="display-labels"></p>	
+				<p id="display-labels"></p>	
 			</p>
 		</div>
 		
