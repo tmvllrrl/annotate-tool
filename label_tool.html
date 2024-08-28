@@ -134,7 +134,6 @@
 	
 <body>
 	<div class="container" style="font-size: large;">
-		<br>
 
 		<p>
 			Image # <span id="image-number"></span>
@@ -161,12 +160,14 @@
 				<li>Cannot go to next image until all labels are not "None."</li>
 				<li>Each field has a dropdown menu for easy selection and typing will autofill label.</li>
 				<li>We recommend using tab to get to the different labels quickly.</li>
-				<br>
+				
 
 				Labels done so far will show up at the bottom with a number indicating
 				how many images labeled so far.
 				<br>
 				Can jump to a particular image to resume progress.
+				<br>
+				Labels periodically download, but provide a button for manual download.
 			</div>
 		</div>
 		
@@ -193,12 +194,13 @@
 		
 		<p>
 			<button onclick="nextImage()" style="border-radius: 3px;">Next Image</button>
-			<button onclick="downloadLabels()" style="margin-left: 48px; border-radius: 3px;">Download Labels</button>
 		</p>
 
 		<div class="container" style="background-color: #bee3ba; min-height: 300px; border-radius: 5px;">
 			<p>
 				<b>Labels (<span id="label-count"></span>): </b>
+				<button onclick="downloadLabels()" style="margin-left: 50%; margin-top: 10px; border-radius: 3px;">Download Labels</button>
+
 				<br>
 				<p id="display-labels"></p>	
 			</p>
