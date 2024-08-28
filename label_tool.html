@@ -52,7 +52,12 @@
 						}
 						
 					}
+
 				}
+
+				localStorage.setItem("currentImage", currentImage-1);
+				localStorage.setItem("imageLabels", JSON.stringify(imageLabels));
+
 
 				// Reset to none so validity checks work
 				resetLabelFields();
@@ -104,6 +109,11 @@
 				download(imageLabels, 'labels.txt', 'text/plain');
 			}
 
+			function resumeLabel() {
+				currentImage = localStorage.getItem("currentImage");
+				imageLabels = JSON.parse(localStorage.getItem("imageLabels"));
+			}
+
 			// Jump to a particular image number; used to resume progress
 			function jumpToImage() {
 				var imageIndex = document.getElementById("image-index").value;
@@ -126,6 +136,7 @@
 			}
 
 			document.addEventListener('DOMContentLoaded', function() {
+				resumeLabel();
 				nextImage();
 			}, false);
 
