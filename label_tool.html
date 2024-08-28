@@ -54,14 +54,15 @@
 					}
 				}
 
-				
+				// Reset to none so validity checks work
 				resetLabelFields();
 				
 				displayLabels();
 				document.getElementById("label-count").innerHTML = Object.keys(imageLabels).length;
 
-				if (currentImage != 0 && currentImage % 10 == 0) {
-					downloadLabel();
+				// Periodically download the labels to a file
+				if (currentImage != 0 && (currentImage + 1) % 10 == 0) {
+					downloadLabels();
 				}
 				
 			}
@@ -98,13 +99,11 @@
 				a.click();
 			}
 
-			function downloadAnnotations() {
-				// download(correctAnnotations, 'correct.txt', 'text/plain');
-				// download(incorrectAnnotations, 'incorrect.txt', 'text/plain');
-				// download(unclearAnnotations, 'unclear.txt', 'text/plain');
+			function downloadLabels() {
 				download(imageLabels, 'labels.txt', 'text/plain');
 			}
 
+			// Jump to a particular image number; used to resume progress
 			function jumpToImage() {
 				var imageIndex = document.getElementById("image-index").value;
 				if (imageIndex < 1 || imageIndex > images.length) {
@@ -118,6 +117,7 @@
 				
 			}
 
+			// Return to previous image; in case of an accident with a label
 			function previousImage() {
 				if (currentImage != 0) {
 					currentImage = currentImage - 2;
@@ -141,7 +141,7 @@
 			Image # <span id="image_number"></span>
 			<br>
 
-			<button onclick="previousImage()" style="font-size: small;">Previous Image</button>
+			<button onclick="previousImage()" style="font-size: small; border-radius: 2px;">Previous Image</button>
 			<button onclick="jumpToImage()" style="font-size: small;">Jump to Image</button>
 			<input type="number" id="image-index" placeholder="Enter image number" style="font-size: small;">
 			
@@ -150,7 +150,7 @@
 				<div class="col-sm">
 					<img src="" id="image_to_classify" style="height: 350px;">
 				</div>
-				<div class="col-sm" style="font-size: large; background-color: #c1c6fc; border-radius: 5px; height: 350px;">
+				<div class="col-sm" style="font-size: large; background-color: #c1c6fc; border-radius: 5px; height: 350px; margin-right: 15px;">
 					<b>Instructions:</b>
 					<br>
 					Enter the correct labels for the provided image.
@@ -195,13 +195,17 @@
 		
 		<p>
 			<button onclick="nextImage()">Next Image</button>
+			<button onclick="downloadLabels()" style="margin-left: 48px;">Download Labels</button>
 		</p>
 
-		<p style="font-size: large;">
-			Labels (<span id="label-count"></span>): 
-			<br>
-			<p id="display-labels"></p>	
-		</p>
+		<div class="container" style="background-color: #bee3ba; min-height: 300px; border-radius: 5px;">
+			<p style="font-size: large;">
+				<b>Labels (<span id="label-count"></span>): </b>
+				<br>
+				<p style="font-size: large;" id="display-labels"></p>	
+			</p>
+		</div>
+		
 
 	</div>
 	
