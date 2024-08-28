@@ -22,67 +22,59 @@
 
 		<script>
 
-			var current_image = -1;
+			var currentImage = -1;
 			var classImageState = 0;
-
-			var correctAnnotations = {};
-			var incorrectAnnotations = {};
-			var unclearAnnotations = {};
 
 			var imageLabels = {};
 
-			function updateImageQuestion(image, label) {
+			function updateImageQuestion(image) {
 				document.getElementById('image_to_classify').src = 'raw_data/'+image; 
-				document.getElementById('image_prediction').innerHTML = label.toUpperCase();
-				document.getElementById('image_number').innerHTML = String(current_image + 1);
+				document.getElementById('image_number').innerHTML = String(currentImage + 1);
 			}
 
 			// Load next image from array and setup annotation scheme
 			function nextImage() {
-				if(current_image + 1 < images.length){
-					current_image++;	
-					image = images[current_image][0];
-					label = images[current_image][1];
-					updateImageQuestion(image, label);
-
-					// Assume the image annotation is correct and setup accordingly
-					document.getElementById("class-image").style.border = "10px solid green";
-					classImageState = 0;
-	
-					// Assign the file name with the annotation as if it was correct to start with
-					correctAnnotations[images[current_image][0]] = images[current_image][1];
-					delete incorrectAnnotations[images[current_image][0]];
-					delete unclearAnnotations[images[current_image][0]];
+				if(currentImage + 1 < images.length){
+					currentImage++;	
+					image = images[currentImage][0];
+					updateImageQuestion(image);
 
 					// Following block saves labels with corresponding image
 					// Don't save label when initially loading the image 
-					if (current_image != 0) {
+					if (currentImage != 0) {
 						// Get labels and save with corresponding image
 						var fluidType = document.getElementById("fluid-type").value;
 						var docConf = document.getElementById("doc-conf").value;
 
 						// Only save if something in fields; avoids errors when jumping to image
-						if (fluidType) {
-							imageLabels[images[current_image-1][0]] = [fluidType, docConf];
+						if (fluidType != "none" && docConf != "none") {
+							imageLabels[images[currentImage-1][0]] = [fluidType, docConf];
 						}
 						
-						// Clear input field
-						document.getElementById("fluid-type").value = "";
 					}
 				}
 
-				// outputAnnotations();
-				displayAnnotations();
+				
+				resetLabelFields();
+				
 				displayLabels();
+				document.getElementById("label-count").innerHTML = Object.keys(imageLabels).length;
 
-				if (current_image != 0 && current_image % 10 == 0) {
-					downloadAnnotations();
+				if (currentImage != 0 && currentImage % 10 == 0) {
+					downloadLabel();
 				}
 				
 			}
 
+			function resetLabelFields() {
+				document.getElementById("fluid-type").value = "none";
+				document.getElementById("doc-conf").value = "none";
+			}
+
 			// Display the labels
 			function displayLabels() {
+				document.getElementById("display-labels").innerHTML = "";
+
 				for (var image in imageLabels) {
 					var fluidType = imageLabels[image][0];
 					var docConf = imageLabels[image][1];
@@ -94,88 +86,7 @@
 				}
 			}
 
-			// Display the annotations
-			function displayAnnotations(){
-				// Show annotation HTML elements
-				document.getElementById("correct-box").style.display = "block";
-				document.getElementById("incorrect-box").style.display = "block";
-				document.getElementById("unclear-box").style.display = "block";
-
-				// Clear results
-				document.getElementById("correct").innerHTML = "";
-				document.getElementById("incorrect").innerHTML = "";
-				document.getElementById("unclear").innerHTML = "";
-
-				var i = 0;
-				for (var image in correctAnnotations) {
-					// Avoid printing the last element since that will always be the current image
-					i++;
-					if (i == Object.keys(correctAnnotations).length) {
-						break;
-					}
-
-					var label = correctAnnotations[image];
-					document.getElementById('correct').innerHTML += image;
-					document.getElementById('correct').innerHTML += ': ';
-					document.getElementById('correct').innerHTML += label;
-					document.getElementById('correct').innerHTML += '<br>';
-
-				}
-
-				for (var image in incorrectAnnotations) {
-					var label = incorrectAnnotations[image];
-					document.getElementById('incorrect').innerHTML += image;
-					document.getElementById('incorrect').innerHTML += ': ';
-					document.getElementById('incorrect').innerHTML += label;
-					document.getElementById('incorrect').innerHTML += '<br>';
-				}
-
-				for (var image in unclearAnnotations) {
-					var label = unclearAnnotations[image];
-					document.getElementById('unclear').innerHTML += image;
-					document.getElementById('unclear').innerHTML += ': ';
-					document.getElementById('unclear').innerHTML += label;
-					document.getElementById('unclear').innerHTML += '<br>';
-				}
-			}
-
-			function switchState() {
-				// Image is in correct annotation state
-				if (classImageState == 0) {
-					document.getElementById("class-image").style.border = "10px solid red";
-					classImageState = 1;
-
-					incorrectAnnotations[images[current_image][0]] = images[current_image][1];
-					delete correctAnnotations[images[current_image][0]];
-					delete unclearAnnotations[images[current_image][0]];
-				}
-				// Image is in incorrect annotation state
-				else if (classImageState == 1) {
-					document.getElementById("class-image").style.border = "10px solid gold";
-					classImageState = 2;
-
-					unclearAnnotations[images[current_image][0]] = images[current_image][1];
-					delete correctAnnotations[images[current_image][0]];
-					delete incorrectAnnotations[images[current_image][0]];
-				}
-				// Image is in unclear annotation state
-				else {
-					document.getElementById("class-image").style.border = "10px solid green";
-					classImageState = 0;
-
-					correctAnnotations[images[current_image][0]] = images[current_image][1];
-					delete incorrectAnnotations[images[current_image][0]];
-					delete unclearAnnotations[images[current_image][0]];
-				}
-
-				// outputAnnotations();
-				
-			}
-
-			function outputAnnotations() {
-				console.log(correctAnnotations);
-				console.log(incorrectAnnotations);
-				console.log(unclearAnnotations);
+			function outputLabels() {
 				console.log(imageLabels);
 			}
 
@@ -201,8 +112,16 @@
 				}
 				else {
 					// Subtracting by 2 b/c of zero indexing and nextImage auto increments by 1
-					current_image = imageIndex - 2;
+					currentImage = imageIndex - 2;
 					nextImage();
+				}
+				
+			}
+
+			function previousImage() {
+				if (currentImage != 0) {
+					currentImage = currentImage - 2;
+					nextImage();	
 				}
 				
 			}
@@ -218,48 +137,56 @@
 	<div class="container">
 		<br>
 
-		<p style="font-size: x-large;">
+		<p style="font-size: large;">
 			Image # <span id="image_number"></span>
 			<br>
+
+			<button onclick="previousImage()" style="font-size: small;">Previous Image</button>
+			<button onclick="jumpToImage()" style="font-size: small;">Jump to Image</button>
+			<input type="number" id="image-index" placeholder="Enter image number" style="font-size: small;">
 			
 			<div class="row">
 				<p></p>
 				<div class="col-sm">
-					<button id="class-image" onclick="switchState()">
-						<img src="" id="image_to_classify" style="width: 300px;">
-					</button>
+					<img src="" id="image_to_classify" style="height: 350px;">
 				</div>
-				<div class="col-sm" style="font-size: x-large; background-color: #c1c6fc; border-radius: 5px; height: fit-content;">
-					Instructions:
+				<div class="col-sm" style="font-size: large; background-color: #c1c6fc; border-radius: 5px; height: 350px;">
+					<b>Instructions:</b>
 					<br>
-					Click on image to change border to correct classification.
-					<br><br>
-					Border Legend:
+					Enter the correct labels for the provided image.
 					<br>
-					<span style="color: green; font-size: x-large;">■</span> Correct
+					Tips:
 					<br>
-					<span style="color: red; font-size: x-large;">■</span> Incorrect
+
+					<li>Cannot go to next image until all labels are not "None."</li>
+					<li>Each field has a dropdown menu for easy selection and typing will autofill label.</li>
+					<li>We recommend using tab to get to the different labels quickly.</li>
 					<br>
-					<span style="color: gold; font-size: x-large;">■</span> Unclear
+
+					Labels done so far will show up at the bottom with a number indicating
+					how many images labeled so far.
+					<br>
+					Can jump to a particular image to resume progress.
 
 				</div>
 				<p></p>
 			</div>
 			
 		</p>
-		
-		<p style="font-size: x-large;">
-			Predicted Label: <span id="image_prediction" style="font-family: 'Times New Roman', Times, serif;"></span>
-			<br>
+
+		<p style="font-size: large;">
+			Fluid Type:
+			<select type="text" id="fluid-type">
+				<option value="none">None</option>
+				<option value="blood">Blood</option>
+				<option value="bile">Bile</option>
+			</select>
 		</p>
 
-		<p style="font-size: x-large;">
-			Fluid Type: <input type="text" id="fluid-type">
-		</p>
-
-		<p style="font-size: x-large;">
+		<p style="font-size: large;">
 			Doctor Confidence: 
 			<select type="text" id="doc-conf">
+				<option value="none">None</option>
 				<option value="low">Low</option>
 				<option value="medium">Medium</option>
 				<option value="high">High</option>
@@ -268,30 +195,14 @@
 		
 		<p>
 			<button onclick="nextImage()">Next Image</button>
-			<button onclick="jumpToImage()">Jump to Image</button>
-			<input type="number" id="image-index" placeholder="Enter image number">
 		</p>
 
-		<p>
-			Labels:
+		<p style="font-size: large;">
+			Labels (<span id="label-count"></span>): 
 			<br>
 			<p id="display-labels"></p>	
 		</p>
 
-		<div class="row">
-			<div class="col-sm" id="correct-box" style="display: none;">
-				<p>Correct Predictions:</p>
-				<p id="correct"></p>
-			</div>
-			<div class="col-sm" id="incorrect-box" style="display: none;">
-				<p>Incorrect Predictions:</p>
-				<p id="incorrect"></p>
-			</div>
-			<div class="col-sm" id="unclear-box" style="display: none;">
-				<p>Unclear Predictions:</p>
-				<p id="unclear"></p>
-			</div>
-		</div>
 	</div>
 	
 
