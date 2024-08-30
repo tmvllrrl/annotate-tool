@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+   	<head>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+      	<title>Annotation Tool</title>
+
+		<script src="sample_img.js">
+		
+		// Loads a 2D array of image arrays with image name and 2 labels
+		// Image format array: [img name, img label1, img label2]
+
+		</script>    
+
+		<script>
+
+			var currentStartIndex = 0;
+			var numShownImages = 4;
+
+			// 0: Blood, 1: Bile
+			var classImageState = {};
+
+			// Stores the labels that have been reviewed up to this point
+			var reviewedLabels = {};
+			
+			function updateImageQuestion(image, label, index) {
+				document.getElementById("image-" + index).src = 'raw_data/'+image; 
+				document.getElementById("image-prediction-" + index).innerHTML = label.toUpperCase();
+				document.getElementById("image-name-" + index).innerHTML = image;
+
+				if (label.toLowerCase() == "blood") {
+					document.getElementById("label-border-" + index).style.border = "8px solid red";
+				}
+				else if (label.toLowerCase() == "bile") {
+					document.getElementById("label-border-" + index).style.border = "8px solid gold";
+				}
+			}
+
+			function nextPage() {
+				// TODO: Check remaining number of images to prevent overflow
+
+				for (var i = 0; i < numShownImages; i++) {
+
+					// TODO: If user goes back, their work on that page gets deleted
+					var image = images[currentStartIndex + i][0];
+					var fluidType = images[currentStartIndex + i][1];
+					var conf = images[currentStartIndex + i][2]; 
+					
+					reviewedLabels[image] = [fluidType, conf];
+
+					// Update image html, using i to index html elements
+					updateImageQuestion(image, reviewedLabels[image][0], i);
+
+					// TODO: Add something for other label
+					// Set state according to label
+					if (fluidType.toLowerCase() == "blood") {
+						classImageState[image] = 0;
+					}
+					else if (fluidType.toLowerCase() == "bile") {
+						classImageState[image] = 1;
+					}
+
+				}
+
+				// Increase index by number of shown images for next page
+				currentStartIndex += numShownImages;
+			}
+
+			function switchState(index) {
+				// Get image name using hidden element
+				image = document.getElementById("image-name-" + index).innerHTML;
+
+				var state = classImageState[image];
+
+				// In blood state, switching to bile state
+				if (state == 0) {
+					// Switch state
+					classImageState[image] = 1;
+
+					// Update annotations
+					reviewedLabels[image][0] = "bile";
+
+					// Update image element
+					updateImageQuestion(image, reviewedLabels[image][0], index);
+				}
+				// In bile state, switching to blood state
+				else if (state == 1) {
+					// Switch state
+					classImageState[image] = 0;
+
+					// Update annotations
+					reviewedLabels[image][0] = "blood";
+
+					// Update image element
+					updateImageQuestion(image, reviewedLabels[image][0], index);
+				}
+
+				outputAnnotations();
+				
+			}
+
+			function outputAnnotations() {
+				console.log(reviewedLabels);
+			}
+
+			function downloadAnnotations() {
+				function download(content, fileName, contentType) {
+					var a = document.createElement("a");
+					var file = new Blob([JSON.stringify(content)], {type: contentType});
+					a.href = URL.createObjectURL(file);
+					a.download = fileName;
+					a.click();
+				}
+
+				download(reviewedLabels, 'reviewed_labels.txt', 'text/plain');
+			}
+
+			function jumpToImage() {
+				var imageIndex = document.getElementById("image-index").value;
+				if (imageIndex < 1 || imageIndex > images.length) {
+
+				}
+				else {
+					// Subtracting by 2 b/c of zero indexing and nextImage auto increments by 1
+					current_image = imageIndex - 2;
+					nextImage();
+				}
+				
+			}
+
+			document.addEventListener('DOMContentLoaded', function() {
+				nextPage();
+			}, false);
+
+		</script>    
+   	</head>
+	
+<body>
+	<div class="container" style="font-size: large;">
+		<br>
+		
+		<div class="row">
+			<div class="col-sm" style="background-color: #c1c6fc; border-radius: 5px; height: fit-content;">
+				Instructions:
+				<br>
+				Click on image to change border to correct classification.
+				<br>
+				Border Legend:
+				<span style="color: red; font-size: x-large;">■</span> Blood
+				<span style="color: gold; font-size: x-large;">■</span> Bile
+	
+			</div>
+
+			<div class="col-sm"></div>
+		</div>
+
+		<br>
+
+		<div class="row">
+			<div class="col-sm">
+				<button id="label-border-0" onclick="switchState(0)">
+					<img src="" id="image-0" style="height: 150px;">
+				</button>
+				<p id="image-prediction-0"></p>
+				<p id="image-name-0" style="display: none;"></p>
+			</div>
+			<div class="col-sm">
+				<button id="label-border-1" onclick="switchState(1)">
+					<img src="" id="image-1" style="height: 150px;">
+				</button>
+				<p id="image-prediction-1"></p>
+				<p id="image-name-1" style="display: none;"></p>
+			</div>
+			<div class="col-sm">
+				<button id="label-border-2" onclick="switchState(2)">
+					<img src="" id="image-2" style="height: 150px;">
+				</button>
+				<p id="image-prediction-2"></p>
+				<p id="image-name-2" style="display: none;"></p>
+			</div>
+			<div class="col-sm">
+				<button id="label-border-3" onclick="switchState(3)">
+					<img src="" id="image-3" style="height: 150px;">
+				</button>
+				<p id="image-prediction-3"></p>
+				<p id="image-name-3" style="display: none;"></p>
+			</div>
+		</div>
+		
+		<p>
+			<button onclick="nextPage()">Next Page</button>
+		</p>
+
+	</div>
+	
+
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+
+

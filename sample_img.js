@@ -1,0 +1,18 @@
+images = [
+    ["1.png", "blood", "high"],
+    ["2.png", "bile", "medium"],
+    ["3.png", "blood", "high"],
+    ["4.png", "blood", "low"],
+    ["5.png", "bile", "low"],
+    ["6.png", "blood", "high"],
+    ["7.png", "blood", "medium"],
+    ["8.png", "blood", "medium"],
+    ["9.png", "bile", "high"],
+    ["10.png", "blood", "low"],
+    ["11.png", "blood", "high"],
+    ["12.png", "blood", "low"],
+    ["13.png", "blood", "medium"],
+    ["14.png", "bile", "high"],
+    ["15.png", "bile", "high"],
+    ["16.png", "blood", "low"],
+]
