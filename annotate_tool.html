@@ -36,8 +36,6 @@
 			}
 
 			function nextPage() {
-				// TODO: Check remaining number of images to prevent overflow
-
 				// Checking to see how many images left and providing user real or dummy images accordingly
 				var check = images.length - currentStartIndex;
 				var realImages;
@@ -121,7 +119,7 @@
 				console.log(reviewedLabels);
 			}
 
-			function downloadAnnotations() {
+			function downloadLabels() {
 				function download(content, fileName, contentType) {
 					var a = document.createElement("a");
 					var file = new Blob([JSON.stringify(content)], {type: contentType});
@@ -143,7 +141,6 @@
 					current_image = imageIndex - 2;
 					nextImage();
 				}
-				
 			}
 
 			document.addEventListener('DOMContentLoaded', function() {
@@ -238,6 +235,10 @@
 		
 		<p>
 			<button onclick="nextPage()">Next Page</button>
+		</p>
+
+		<p>
+			<button onclick="downloadLabels()">Download Reviewed Labels</button>
 		</p>
 
 	</div>
