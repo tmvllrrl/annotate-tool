@@ -15,4 +15,5 @@ images = [
     ["14.png", "bile", "high"],
     ["15.png", "bile", "high"],
     ["16.png", "blood", "low"],
+    ["17.png", "blood", "high"],
 ]

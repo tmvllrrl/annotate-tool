@@ -14,7 +14,7 @@
 		<script>
 
 			var currentStartIndex = 0;
-			var numShownImages = 4;
+			var numShownImages = 8;
 
 			// 0: Blood, 1: Bile
 			var classImageState = {};
@@ -38,7 +38,21 @@
 			function nextPage() {
 				// TODO: Check remaining number of images to prevent overflow
 
-				for (var i = 0; i < numShownImages; i++) {
+				// Checking to see how many images left and providing user real or dummy images accordingly
+				var check = images.length - currentStartIndex;
+				var realImages;
+				var dummyImages;
+
+				if (check > numShownImages - 1) {
+					realImages = numShownImages;
+					dummyImages = 0;
+				} 
+				else {
+					realImages = check;
+					dummyImages = numShownImages - check;
+				}
+
+				for (var i = 0; i < realImages; i++) {
 
 					// TODO: If user goes back, their work on that page gets deleted
 					var image = images[currentStartIndex + i][0];
@@ -59,6 +73,11 @@
 						classImageState[image] = 1;
 					}
 
+				}
+
+				for (var i = check; i < (check + dummyImages); i++) {
+					reviewedLabels["dummy.png"] = ["blood", "high"];
+					updateImageQuestion("dummy.png", "blood", i);
 				}
 
 				// Increase index by number of shown images for next page
@@ -183,6 +202,37 @@
 				</button>
 				<p id="image-prediction-3"></p>
 				<p id="image-name-3" style="display: none;"></p>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm">
+				<button id="label-border-4" onclick="switchState(4)">
+					<img src="" id="image-4" style="height: 150px;">
+				</button>
+				<p id="image-prediction-4"></p>
+				<p id="image-name-4" style="display: none;"></p>
+			</div>
+			<div class="col-sm">
+				<button id="label-border-5" onclick="switchState(5)">
+					<img src="" id="image-5" style="height: 150px;">
+				</button>
+				<p id="image-prediction-5"></p>
+				<p id="image-name-5" style="display: none;"></p>
+			</div>
+			<div class="col-sm">
+				<button id="label-border-6" onclick="switchState(6)">
+					<img src="" id="image-6" style="height: 150px;">
+				</button>
+				<p id="image-prediction-6"></p>
+				<p id="image-name-6" style="display: none;"></p>
+			</div>
+			<div class="col-sm">
+				<button id="label-border-7" onclick="switchState(7)">
+					<img src="" id="image-7" style="height: 150px;">
+				</button>
+				<p id="image-prediction-7"></p>
+				<p id="image-name-7" style="display: none;"></p>
 			</div>
 		</div>
 		
