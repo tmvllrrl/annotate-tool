@@ -14,7 +14,9 @@
 		<script>
 
 			var currentStartIndex = 0;
-			var numShownImages = 8;
+			var numRows = 2;
+			var numCols = 4;
+			var numShownImages = numRows * numCols;
 
 			// 0: Blood, 1: Bile
 			var classImageState = {};
@@ -147,6 +149,50 @@
 				nextPage();
 			}, false);
 
+			function createGallery() {
+
+				for (let i = 0; i < numRows; i++) {
+					const row = document.createElement("div");
+					row.setAttribute("class", "row");
+
+					for (let j = 0; j < numCols; j++) {
+						var index = (i * numCols) + (j);
+						console.log(index);
+						const col = document.createElement("div");
+						col.setAttribute("class", "col-sm");
+
+						const button = document.createElement("button");
+						button.id = `label-border-${index}`;
+						button.onclick = `switchState(${index})`;
+
+						const img = document.createElement("img");
+						img.id = `image-${index}`;
+						img.style.height = "150px";
+
+						// Img goes inside the button
+						button.appendChild(img);
+
+						const pred = document.createElement("p");
+						pred.id = `image-prediction-${index}`;
+
+						const name = document.createElement("p");
+						name.id = `image-name-${index}`;
+						name.style.display = "none";
+
+						// Create an individual col with attached elements
+						col.appendChild(button);
+						col.appendChild(pred);
+						col.appendChild(name);
+
+						row.appendChild(col);
+
+					}
+
+					document.getElementById("gallery").appendChild(row);
+				}
+				
+			}
+
 		</script>    
    	</head>
 	
@@ -171,67 +217,74 @@
 
 		<br>
 
-		<div class="row">
-			<div class="col-sm">
-				<button id="label-border-0" onclick="switchState(0)">
-					<img src="" id="image-0" style="height: 150px;">
-				</button>
-				<p id="image-prediction-0"></p>
-				<p id="image-name-0" style="display: none;"></p>
+		<div id="gallery">
+			<!-- <div class="row">
+				<div class="col-sm">
+					<button id="label-border-0" onclick="switchState(0)">
+						<img src="" id="image-0" style="height: 150px;">
+					</button>
+					<p id="image-prediction-0"></p>
+					<p id="image-name-0" style="display: none;"></p>
+				</div>
+				<div class="col-sm">
+					<button id="label-border-1" onclick="switchState(1)">
+						<img src="" id="image-1" style="height: 150px;">
+					</button>
+					<p id="image-prediction-1"></p>
+					<p id="image-name-1" style="display: none;"></p>
+				</div>
+				<div class="col-sm">
+					<button id="label-border-2" onclick="switchState(2)">
+						<img src="" id="image-2" style="height: 150px;">
+					</button>
+					<p id="image-prediction-2"></p>
+					<p id="image-name-2" style="display: none;"></p>
+				</div>
+				<div class="col-sm">
+					<button id="label-border-3" onclick="switchState(3)">
+						<img src="" id="image-3" style="height: 150px;">
+					</button>
+					<p id="image-prediction-3"></p>
+					<p id="image-name-3" style="display: none;"></p>
+				</div>
 			</div>
-			<div class="col-sm">
-				<button id="label-border-1" onclick="switchState(1)">
-					<img src="" id="image-1" style="height: 150px;">
-				</button>
-				<p id="image-prediction-1"></p>
-				<p id="image-name-1" style="display: none;"></p>
-			</div>
-			<div class="col-sm">
-				<button id="label-border-2" onclick="switchState(2)">
-					<img src="" id="image-2" style="height: 150px;">
-				</button>
-				<p id="image-prediction-2"></p>
-				<p id="image-name-2" style="display: none;"></p>
-			</div>
-			<div class="col-sm">
-				<button id="label-border-3" onclick="switchState(3)">
-					<img src="" id="image-3" style="height: 150px;">
-				</button>
-				<p id="image-prediction-3"></p>
-				<p id="image-name-3" style="display: none;"></p>
-			</div>
-		</div>
+	
+			<div class="row">
+				<div class="col-sm">
+					<button id="label-border-4" onclick="switchState(4)">
+						<img src="" id="image-4" style="height: 150px;">
+					</button>
+					<p id="image-prediction-4"></p>
+					<p id="image-name-4" style="display: none;"></p>
+				</div>
+				<div class="col-sm">
+					<button id="label-border-5" onclick="switchState(5)">
+						<img src="" id="image-5" style="height: 150px;">
+					</button>
+					<p id="image-prediction-5"></p>
+					<p id="image-name-5" style="display: none;"></p>
+				</div>
+				<div class="col-sm">
+					<button id="label-border-6" onclick="switchState(6)">
+						<img src="" id="image-6" style="height: 150px;">
+					</button>
+					<p id="image-prediction-6"></p>
+					<p id="image-name-6" style="display: none;"></p>
+				</div>
+				<div class="col-sm">
+					<button id="label-border-7" onclick="switchState(7)">
+						<img src="" id="image-7" style="height: 150px;">
+					</button>
+					<p id="image-prediction-7"></p>
+					<p id="image-name-7" style="display: none;"></p>
+				</div>
+			</div> -->
 
-		<div class="row">
-			<div class="col-sm">
-				<button id="label-border-4" onclick="switchState(4)">
-					<img src="" id="image-4" style="height: 150px;">
-				</button>
-				<p id="image-prediction-4"></p>
-				<p id="image-name-4" style="display: none;"></p>
-			</div>
-			<div class="col-sm">
-				<button id="label-border-5" onclick="switchState(5)">
-					<img src="" id="image-5" style="height: 150px;">
-				</button>
-				<p id="image-prediction-5"></p>
-				<p id="image-name-5" style="display: none;"></p>
-			</div>
-			<div class="col-sm">
-				<button id="label-border-6" onclick="switchState(6)">
-					<img src="" id="image-6" style="height: 150px;">
-				</button>
-				<p id="image-prediction-6"></p>
-				<p id="image-name-6" style="display: none;"></p>
-			</div>
-			<div class="col-sm">
-				<button id="label-border-7" onclick="switchState(7)">
-					<img src="" id="image-7" style="height: 150px;">
-				</button>
-				<p id="image-prediction-7"></p>
-				<p id="image-name-7" style="display: none;"></p>
-			</div>
+			<script>
+				createGallery();
+			</script>
 		</div>
+		
 		
 		<p>
 			<button onclick="nextPage()">Next Page</button>
