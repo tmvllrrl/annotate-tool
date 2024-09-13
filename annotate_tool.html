@@ -10,7 +10,7 @@
 		</script>    
 
 		<script src="annotate_tool.js">
-			// Loads functions annotation tool
+			// Loads functions annotation tool 
 		</script>    
    	</head>
 	
@@ -35,15 +35,25 @@
 
 		<br>
 
-		<div id="gallery">
+		<div class="row">
+			<p>
+				<select name="labeler" id="labeler" onchange="saveLabeler()">
+					<option value="none">Select Experience Level</option>
+					<option value="doctor">Doctor</option>
+					<option value="student">Student</option>
+				</select>
+			</p>
+		</div>
+
+		<div id="gallery" style="background-color: #c1e1ec; border-radius: 5px; padding-bottom: 2px;">
 			<script>
 				createGallery();
 			</script>
 		</div>
 		
-		
 		<p>
-			<button onclick="nextPage()">Next Page</button>
+			<button onclick="nextPage()" style="margin-top: 8px;">Next Page</button>
+			<button onclick="prevPage()" style="margin-top: 8px;">Previous Page</button>
 		</p>
 
 		<p>

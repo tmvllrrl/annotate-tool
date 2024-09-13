@@ -1,9 +1,10 @@
 
 
-var currentStartIndex = 0;
+
 var numRows = 2;
 var numCols = 4;
 var numShownImages = numRows * numCols;
+var currentStartIndex = -numShownImages;
 
 // 0: Blood, 1: Bile
 var fluidState = {};
@@ -13,32 +14,47 @@ var confState = {};
 // Stores the labels that have been reviewed up to this point
 var reviewedLabels = {};
 
+for (let i = 0; i < images.length; i++) {
+    reviewedLabels[images[i][0]] = [images[i][1], images[i][2], images[i][0]];
+}
+
+// Stores the labeler
+var labeler = "none";
+
 function updateImageQuestion(image, fluidLabel, confLabel, index) {
-    document.getElementById(`image-${index}`).src = 'raw_data/'+image; 
-    document.getElementById(`fluid-label-${index}`).innerHTML = fluidLabel.toUpperCase();
+    document.getElementById(`image-${index}`).src = 'raw_data/'+image;
+    document.getElementById(`image-number-${index}`).innerHTML = (currentStartIndex) + index + 1 + "."; 
+    document.getElementById(`fluid-label-${index}`).innerHTML = " " + fluidLabel.toUpperCase();
     document.getElementById(`conf-label-${index}`).innerHTML = confLabel.toUpperCase();
     document.getElementById(`image-name-${index}`).innerHTML = image;
 
     if (fluidLabel.toLowerCase() == "blood") {
-        document.getElementById("label-border-" + index).style.border = "8px solid red";
+        document.getElementById("label-border-" + index).style.border = "5px solid red";
     }
     else if (fluidLabel.toLowerCase() == "bile") {
-        document.getElementById("label-border-" + index).style.border = "8px solid gold";
+        document.getElementById("label-border-" + index).style.border = "5px solid gold";
     }
 
     
     if (confLabel.toLowerCase() == "low") {
-        document.getElementById(`conf-button-${index}`).style.backgroundColor = "red";
+        document.getElementById(`conf-button-${index}`).style.backgroundColor = "#FF6868";
+        document.getElementById(`conf-button-${index}`).style.border = "2px solid #CC3636"
     }
     else if (confLabel.toLowerCase() == "medium") {
-        document.getElementById(`conf-button-${index}`).style.backgroundColor = "gold";
+        document.getElementById(`conf-button-${index}`).style.backgroundColor = "#F7D060";
+        document.getElementById(`conf-button-${index}`).style.border = "2px solid #FFA447";
     }
     else if (confLabel.toLowerCase() == "high") {
-        document.getElementById(`conf-button-${index}`).style.backgroundColor = "green";
+        document.getElementById(`conf-button-${index}`).style.backgroundColor = "#9ADE7B";
+        document.getElementById(`conf-button-${index}`).style.border = "2px solid #508D69"
     }
+
 }
 
 function nextPage() {
+    // Increase index by number of shown images for next page
+    currentStartIndex += numShownImages;
+
     // Checking to see how many images left and providing user real or dummy images accordingly
     var check = images.length - currentStartIndex;
     var realImages;
@@ -53,14 +69,16 @@ function nextPage() {
         dummyImages = numShownImages - check;
     }
 
+    console.log("in next page", currentStartIndex);
+
     for (var i = 0; i < realImages; i++) {
 
         // TODO: If user goes back, their work on that page gets deleted
-        var image = images[currentStartIndex + i][0];
-        var fluidType = images[currentStartIndex + i][1];
-        var conf = images[currentStartIndex + i][2]; 
+        var image = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][2];
+        var fluidType = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][0];
+        var conf = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][1];
         
-        reviewedLabels[image] = [fluidType, conf];
+        // reviewedLabels[image] = [fluidType, conf];
 
         // Update image html, using i to index html elements
         updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], i);
@@ -91,8 +109,11 @@ function nextPage() {
         updateImageQuestion("dummy.png", "blood", "high", i);
     }
 
-    // Increase index by number of shown images for next page
-    currentStartIndex += numShownImages;
+    localStorage.setItem("currentStartIndex", currentStartIndex);
+    localStorage.setItem("fluidState", JSON.stringify(fluidState));
+    localStorage.setItem("confState", JSON.stringify(confState));
+    localStorage.setItem("reviewedLabels", JSON.stringify(reviewedLabels));
+
 }
 
 function switchFluidState(index) {
@@ -197,7 +218,9 @@ function jumpToImage() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    resumeLabel();
     nextPage();
+    loadLabeler();
 }, false);
 
 function createGallery() {
@@ -215,12 +238,20 @@ function createGallery() {
 
             // Create col to append the image elements to
             const col = document.createElement("div");
-            col.setAttribute("class", "col-sm");
+            col.setAttribute("class", "col-sm text-center");
 
-            // Create the fluid label
-            const fluidLabel = document.createElement("p");
+            // Create the title which includes image number and fluid label
+            const title = document.createElement("p");
+            title.style.marginBottom = "4px";
+
+            const imgNumber = document.createElement("span");
+            imgNumber.id = `image-number-${index}`;
+
+            const fluidLabel = document.createElement("span");
             fluidLabel.id = `fluid-label-${index}`;
-            fluidLabel.style.marginBottom = "4px";
+            
+            title.appendChild(imgNumber);
+            title.appendChild(fluidLabel);
 
             // Create the border the img is housed in
             const button = document.createElement("button");
@@ -240,7 +271,7 @@ function createGallery() {
             const confButton = document.createElement("button");
             confButton.id = `conf-button-${index}`;
             confButton.setAttribute("onclick", `switchConfState(${index})`);
-            confButton.style.width = "100px";
+            confButton.style.width = "150px";
 
             const confLabel = document.createElement("p");
             confLabel.id = `conf-label-${index}`;
@@ -254,7 +285,7 @@ function createGallery() {
             name.style.display = "none";
 
             // Create an individual col with attached elements
-            col.appendChild(fluidLabel);
+            col.appendChild(title);
             col.appendChild(button);
             col.appendChild(br);
             col.appendChild(confButton);
@@ -268,5 +299,29 @@ function createGallery() {
         // Append the current row to the gallery
         document.getElementById("gallery").appendChild(row);
     }
-    
+}
+
+function saveLabeler() {
+    labeler = document.getElementById("labeler").value;
+    localStorage.setItem("labeler", labeler);
+}
+
+function loadLabeler() {
+    labeler = document.getElementById("labeler");
+    labeler.value = localStorage.getItem("labeler");
+}
+
+function resumeLabel() {
+    currentStartIndex = Number(localStorage.getItem("currentStartIndex"));
+    console.log(currentStartIndex);
+    fluidState = JSON.parse(localStorage.getItem("fluidState"));
+    confState = JSON.parse(localStorage.getItem("confState"));
+    reviewedLabels = JSON.parse(localStorage.getItem("reviewedLabels"));
+}
+
+function prevPage() {
+    if (currentStartIndex != 0) {
+        currentStartIndex = currentStartIndex - (2 * numShownImages);
+        nextPage();	
+    }
 }
