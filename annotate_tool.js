@@ -1,54 +1,26 @@
-
-
-
-var numRows = 2;
-var numCols = 4;
+var numRows = 3;
+var numCols = 3;
 var numShownImages = numRows * numCols;
 var currentStartIndex = -numShownImages;
-
-// 0: Blood, 1: Bile
-var fluidState = {};
-// 0: low, 1: medium, 2: high
-var confState = {};
 
 // Stores the labels that have been reviewed up to this point
 var reviewedLabels = {};
 
 for (let i = 0; i < images.length; i++) {
-    reviewedLabels[images[i][0]] = [images[i][1], images[i][2], images[i][0]];
+    // Each entry looks like imageName: [imageName, color, consistency, drainage]
+    reviewedLabels[images[i][0]] = [images[i][0], images[i][1], images[1][2], images[i][3]];
 }
 
 // Stores the labeler
 var labeler = "none";
 
-function updateImageQuestion(image, fluidLabel, confLabel, index) {
+function updateItem(image, color, consistency, drainage, index) {
     document.getElementById(`image-${index}`).src = 'raw_data/'+image;
-    document.getElementById(`image-number-${index}`).innerHTML = (currentStartIndex) + index + 1 + "."; 
-    document.getElementById(`fluid-label-${index}`).innerHTML = " " + fluidLabel.toUpperCase();
-    document.getElementById(`conf-label-${index}`).innerHTML = confLabel.toUpperCase();
+    document.getElementById(`image-number-${index}`).innerHTML = `Image #${(currentStartIndex) + index + 1}`; 
+    document.getElementById(`color-label-${index}`).value = color;
+    document.getElementById(`consistency-label-${index}`).value = consistency;
+    document.getElementById(`drainage-label-${index}`).value = drainage;
     document.getElementById(`image-name-${index}`).innerHTML = image;
-
-    if (fluidLabel.toLowerCase() == "blood") {
-        document.getElementById("label-border-" + index).style.border = "5px solid red";
-    }
-    else if (fluidLabel.toLowerCase() == "bile") {
-        document.getElementById("label-border-" + index).style.border = "5px solid gold";
-    }
-
-    
-    if (confLabel.toLowerCase() == "low") {
-        document.getElementById(`conf-button-${index}`).style.backgroundColor = "#FF6868";
-        document.getElementById(`conf-button-${index}`).style.border = "2px solid #CC3636"
-    }
-    else if (confLabel.toLowerCase() == "medium") {
-        document.getElementById(`conf-button-${index}`).style.backgroundColor = "#F7D060";
-        document.getElementById(`conf-button-${index}`).style.border = "2px solid #FFA447";
-    }
-    else if (confLabel.toLowerCase() == "high") {
-        document.getElementById(`conf-button-${index}`).style.backgroundColor = "#9ADE7B";
-        document.getElementById(`conf-button-${index}`).style.border = "2px solid #508D69"
-    }
-
 }
 
 function nextPage() {
@@ -69,128 +41,64 @@ function nextPage() {
         dummyImages = numShownImages - check;
     }
 
-    console.log("in next page", currentStartIndex);
-
     for (var i = 0; i < realImages; i++) {
 
-        // TODO: If user goes back, their work on that page gets deleted
-        var image = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][2];
-        var fluidType = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][0];
-        var conf = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][1];
-        
-        // reviewedLabels[image] = [fluidType, conf];
+        var image = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][0];
+        var color = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][1];
+        var consistency = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][2];
+        var drainage = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][3];
 
         // Update image html, using i to index html elements
-        updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], i);
-
-        // Set fluid state according to label
-        if (fluidType.toLowerCase() == "blood") {
-            fluidState[image] = 0;
-        }
-        else if (fluidType.toLowerCase() == "bile") {
-            fluidState[image] = 1;
-        }
-
-        // Set conf state according to label
-        if (conf.toLowerCase() == "low") {
-            confState[image] = 0;
-        }
-        else if (conf.toLowerCase() == "medium") {
-            confState[image] = 1;
-        }
-        else if (conf.toLowerCase() == "high") {
-            confState[image] = 2;
-        }
+        updateItem(image, color, consistency, drainage, i);
 
     }
 
     for (var i = check; i < (check + dummyImages); i++) {
-        reviewedLabels["dummy.png"] = ["blood", "high"];
-        updateImageQuestion("dummy.png", "blood", "high", i);
+        updateItem("dummy.png", "sanguineous", "thick/viscous", "enteric", i);
     }
 
-    localStorage.setItem("currentStartIndex", currentStartIndex);
-    localStorage.setItem("fluidState", JSON.stringify(fluidState));
-    localStorage.setItem("confState", JSON.stringify(confState));
-    localStorage.setItem("reviewedLabels", JSON.stringify(reviewedLabels));
-
+    // save();
 }
 
-function switchFluidState(index) {
-    // Get image name using hidden element
-    image = document.getElementById("image-name-" + index).innerHTML;
+function switchColorState(index) {
+    // Need to get image name to alter reviewed labels
+    var image = document.getElementById(`image-name-${index}`).innerHTML;
+    // Getting up-to-date color value
+    var color = document.getElementById(`color-label-${index}`).value;
 
-    var state = fluidState[image];
-
-    // In blood state, switching to bile state
-    if (state == 0) {
-        // Switch state
-        fluidState[image] = 1;
-
-        // Update annotations
-        reviewedLabels[image][0] = "bile";
-
-        // Update image element
-        updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], index);
-    }
-    // In bile state, switching to blood state
-    else if (state == 1) {
-        // Switch state
-        fluidState[image] = 0;
-
-        // Update annotations
-        reviewedLabels[image][0] = "blood";
-
-        // Update image element
-        updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], index);
-    }
-    logLabels();
+    reviewedLabels[image][1] = color;
 }
 
-function switchConfState(index) {
-    // Get image name using hidden element
-    image = document.getElementById("image-name-" + index).innerHTML;
+function switchConsistencyState(index) {
+    // Need to get image name to alter reviewed labels
+    var image = document.getElementById(`image-name-${index}`).innerHTML;
+    // Getting up-to-date color value
+    var consistency = document.getElementById(`consistency-label-${index}`).value;
 
-    var state = confState[image];
-
-    // In low state, switching to medium state
-    if (state == 0) {
-        // Switch state
-        confState[image] = 1;
-
-        // Update annotations
-        reviewedLabels[image][1] = "medium";
-
-        // Update image element
-        updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], index);
-    }
-    // In medium state, switching to high state
-    else if (state == 1) {
-        // Switch state
-        confState[image] = 2;
-
-        // Update annotations
-        reviewedLabels[image][1] = "high";
-
-        // Update image element
-        updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], index);
-    }
-    // In high state, switching to low state
-    else if (state == 2) {
-        // Switch state
-        confState[image] = 0;
-
-        // Update annotations
-        reviewedLabels[image][1] = "low";
-
-        // Update image element
-        updateImageQuestion(image, reviewedLabels[image][0], reviewedLabels[image][1], index);
-    }
-    logLabels();
+    reviewedLabels[image][2] = consistency;
 }
 
-function logLabels() {
-    console.log(reviewedLabels);
+function switchDrainageState(index) {
+    // Need to get image name to alter reviewed labels
+    var image = document.getElementById(`image-name-${index}`).innerHTML;
+    // Getting up-to-date color value
+    var drainage = document.getElementById(`drainage-label-${index}`).value;
+
+    reviewedLabels[image][3] = drainage;
+}
+
+function switchZoom(index) {
+    var imageSrc = document.getElementById(`image-${index}`);
+    var height = imageSrc.style.height;
+
+    // Zoom in
+    if (height == "200px") {
+        imageSrc.style.height = "400px";
+    } 
+    // Zoom out
+    else if (height == "400px") {
+        imageSrc.style.height = "200px";
+    }
 }
 
 function downloadLabels() {
@@ -205,20 +113,9 @@ function downloadLabels() {
     download(reviewedLabels, 'reviewed_labels.txt', 'text/plain');
 }
 
-function jumpToImage() {
-    var imageIndex = document.getElementById("image-index").value;
-    if (imageIndex < 1 || imageIndex > images.length) {
-
-    }
-    else {
-        // Subtracting by 2 b/c of zero indexing and nextImage auto increments by 1
-        current_image = imageIndex - 2;
-        nextImage();
-    }
-}
 
 document.addEventListener('DOMContentLoaded', function() {
-    resumeLabel();
+    // resumeLabel();
     nextPage();
     loadLabeler();
 }, false);
@@ -233,63 +130,146 @@ function createGallery() {
 
         for (let j = 0; j < numCols; j++) {
 
+            const br = document.createElement("br");
+
             // Index uniquely identifies the imgs
             var index = (i * numCols) + (j);
 
             // Create col to append the image elements to
             const col = document.createElement("div");
-            col.setAttribute("class", "col-sm text-center");
+            col.setAttribute("class", "col");
+            col.style.backgroundColor = "#add8e6";
+            col.style.margin = "8px";
+            col.style.borderRadius = "8px";
 
-            // Create the title which includes image number and fluid label
+            // Row to store the image and labels side-by-side
+            const itemRow = document.createElement("div");
+            itemRow.setAttribute("class", "row");
+
+            // IMAGE COLUMN /////////////////////////////////////////
+            // Col element for image
+            const imageCol = document.createElement("div");
+            imageCol.setAttribute("class", "col");
+
+            // Put title, containing image number, over image
             const title = document.createElement("p");
+            title.id = `image-number-${index}`;
             title.style.marginBottom = "4px";
-
-            const imgNumber = document.createElement("span");
-            imgNumber.id = `image-number-${index}`;
-
-            const fluidLabel = document.createElement("span");
-            fluidLabel.id = `fluid-label-${index}`;
-            
-            title.appendChild(imgNumber);
-            title.appendChild(fluidLabel);
 
             // Create the border the img is housed in
             const button = document.createElement("button");
-            button.id = `label-border-${index}`;
-            button.setAttribute("onclick", `switchFluidState(${index})`);
+            button.id = `zoom-${index}`;
+            // TODO: Change to a zoom function
+            button.setAttribute("onclick", `switchZoom(${index})`);
 
             const img = document.createElement("img");
             img.id = `image-${index}`;
-            img.style.height = "150px";
+            img.style.height = "200px";
 
             // Img goes inside the button
             button.appendChild(img);
 
-            const br = document.createElement("br");
+            // imageCol order: Title -> Button (contains Image)
+            imageCol.appendChild(title);
+            imageCol.appendChild(button);
 
-            // Create button for switching conf state
-            const confButton = document.createElement("button");
-            confButton.id = `conf-button-${index}`;
-            confButton.setAttribute("onclick", `switchConfState(${index})`);
-            confButton.style.width = "150px";
+            // Add imageCol to single item row
+            itemRow.appendChild(imageCol);
 
-            const confLabel = document.createElement("p");
-            confLabel.id = `conf-label-${index}`;
+            // LABELS COLUMN ////////////////////////////////////////
+            // Col element for the 3 labels
+            const labelCol = document.createElement("div");
+            labelCol.setAttribute("class", "col");
 
-            // Confidence label goes inside the button
-            confButton.appendChild(confLabel);
+            // Color Label
+            var colorLabelValues = ["None", "Serous", "Sanguineous", "Serosanguineous",
+                "Chylous", "Bilious", "Purulent", "Hemorrhagic", "Feculent"
+            ];
+
+            const colorLabelSelect = document.createElement("select");
+            colorLabelSelect.setAttribute("onchange", `switchColorState(${index})`);
+            colorLabelSelect.id = `color-label-${index}`;
+            colorLabelSelect.style.marginBottom = "16px";
+
+            for (let i = 0; i < colorLabelValues.length; i++) {
+                var option = document.createElement("option");
+                option.value = colorLabelValues[i].toLowerCase();
+                option.text = colorLabelValues[i];
+                colorLabelSelect.appendChild(option);
+            }
+            
+            const colorLabelTitle = document.createElement("span");
+            colorLabelTitle.innerHTML = "Color:"
+
+            // Add Color Label items
+            labelCol.appendChild(colorLabelTitle);
+            labelCol.appendChild(document.createElement("br"));
+            labelCol.appendChild(colorLabelSelect);
+            labelCol.appendChild(document.createElement("br"));
+            
+            // Consistency Label 
+            var consistencyLabelValues = ["None", "Thin/Watery", "Thick/Viscous",
+                "Clotted", "Oily", "Mucous"
+            ];
+
+            const consistencyLabelSelect = document.createElement("select");
+            consistencyLabelSelect.setAttribute("onchange", `switchConsistencyState(${index})`);
+            consistencyLabelSelect.id = `consistency-label-${index}`;
+            consistencyLabelSelect.style.marginBottom = "16px";
+
+            for (let i = 0; i < consistencyLabelValues.length; i++) {
+                var option  = document.createElement("option");
+                option.value = consistencyLabelValues[i].toLowerCase();
+                option.text = consistencyLabelValues[i];
+                consistencyLabelSelect.appendChild(option);
+            }
+
+            const consistencyLabelTitle = document.createElement("span");
+            consistencyLabelTitle.innerHTML = "Consistency:"
+
+            // Add Consistency Label items
+            labelCol.appendChild(consistencyLabelTitle);
+            labelCol.appendChild(document.createElement("br"));
+            labelCol.appendChild(consistencyLabelSelect);
+            labelCol.appendChild(document.createElement("br"));
+
+            // Drainage Label
+            var drainageLabelValues = ["None", "Lymphatic", "Biliary", "Pancreatic",
+                "Enteric", "Hemorrhagic",
+            ];
+
+            const drainageLabelSelect = document.createElement("select");
+            drainageLabelSelect.setAttribute("onchange", `switchDrainageState(${index})`);
+            drainageLabelSelect.id = `drainage-label-${index}`;
+            drainageLabelSelect.style.marginBottom = "16px";
+
+            for (let i = 0; i < drainageLabelValues.length; i++) {
+                var option = document.createElement("option");
+                option.value = drainageLabelValues[i].toLowerCase();
+                option.text = drainageLabelValues[i];
+                drainageLabelSelect.appendChild(option);
+            }
+
+            const drainageLabelTitle = document.createElement("span");
+            drainageLabelTitle.innerHTML = "Drainage:";
+
+            // Add Drainage Label items
+            labelCol.appendChild(drainageLabelTitle);
+            labelCol.appendChild(document.createElement("br"));
+            labelCol.appendChild(drainageLabelSelect);
+            labelCol.appendChild(document.createElement("br"));
 
             // Create the name; used for storing reviewed labels
             const name = document.createElement("p");
             name.id = `image-name-${index}`;
             name.style.display = "none";
+            labelCol.appendChild(name);
 
-            // Create an individual col with attached elements
-            col.appendChild(title);
-            col.appendChild(button);
-            col.appendChild(br);
-            col.appendChild(confButton);
-            col.appendChild(name);
+            // Add label column to item row
+            itemRow.appendChild(labelCol);
+
+            // Add item row to inner column
+            col.appendChild(itemRow);
 
             // Append each created col to the row
             row.appendChild(col);
@@ -311,11 +291,19 @@ function loadLabeler() {
     labeler.value = localStorage.getItem("labeler");
 }
 
-function resumeLabel() {
+function save() {
+    // Saving index, state dictionaries, and reviewed labels to local storage for persistence
+    // localStorage.setItem("currentStartIndex", currentStartIndex);
+    // localStorage.setItem("colorState", JSON.stringify(colorState));
+    // localStorage.setItem("consistencyState", JSON.stringify(consistencyState));
+    // localStorage.setItem("drainageState", JSON.stringify(drainageState));
+    // localStorage.setItem("reviewedLabels", JSON.stringify(reviewedLabels));
+}
+function resume() {
     currentStartIndex = Number(localStorage.getItem("currentStartIndex"));
-    console.log(currentStartIndex);
-    fluidState = JSON.parse(localStorage.getItem("fluidState"));
-    confState = JSON.parse(localStorage.getItem("confState"));
+    colorState = JSON.parse(localStorage.getItem("colorState"));
+    consistencyState = JSON.parse(localStorage.getItem("consistencyState"));
+    drainageState = JSON.parse(localStorage.getItem("drainageState"));
     reviewedLabels = JSON.parse(localStorage.getItem("reviewedLabels"));
 }
 
@@ -323,5 +311,115 @@ function prevPage() {
     if (currentStartIndex != 0) {
         currentStartIndex = currentStartIndex - (2 * numShownImages);
         nextPage();	
+    }
+}
+
+// OBSOLETE COMPONENTS /////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Dictionary containing (imageName: state) pairs for color label
+ * 
+ * State number: Label
+ * 0: serous
+ * 1: sanguineous
+ * 2: serosanguineous
+ * 3: chylous
+ * 4: bilious
+ * 5: purulent
+ * 6: hemorrhagic
+ * 7: feculent
+ * 
+ */
+var colorState = {};
+
+/**
+ * Dictionary containing (imageName: state) pairs for consistency label
+ * 
+ * State number: Label
+ * 0: thin/watery
+ * 1: thick/viscous
+ * 2: clotted
+ * 3: oily
+ * 4: mucous
+ * 
+ */
+var consistencyState = {};
+
+/**
+ * Dictionary containing (imageName: state) pairs for drainage label
+ * 
+ * State number: Label
+ * 0: lymphatic
+ * 1: biliary
+ * 2: pancreatic
+ * 3: enteric
+ * 4: hemorrhagic
+ * 
+ */
+var drainageState = {};
+
+function setColorState(color, image) {
+    switch(color) {
+        case "serous":
+            colorState[image] = 0;
+            break;
+        case "sanguineous":
+            colorState[image] = 1;
+            break;
+        case "serosanguineous":
+            colorState[image] = 2;
+            break;
+        case "chylous":
+            colorState[image] = 3;
+            break;
+        case "bilious":
+            colorState[image] = 4;
+            break;
+        case "purulent":
+            colorState[image] = 5;
+            break;
+        case "hemorrhagic":
+            colorState[image] = 6;
+            break;
+        case "feculent":
+            colorState[image] = 7;
+    }
+}
+
+function setConsistencyState(consistency, image) {
+    switch(consistency) {
+        case "thin/watery":
+            consistencyState[image] = 0;
+            break;
+        case "thick/viscous":
+            consistencyState[image] = 1;
+            break;
+        case "clotted":
+            consistencyState[image] = 2;
+            break;
+        case "oily":
+            consistencyState[image] = 3;
+            break;
+        case "mucous":
+            consistencyState[image] = 4;
+    }
+}
+
+function setDrainageState(drainage, image) {
+    switch(drainage) {
+        case "lymphatic":
+            drainageState[image] = 0;
+            break;
+        case "biliary":
+            drainageState[image] = 1;
+            break;
+        case "pancreatic":
+            drainageState[image] = 2;
+            break;
+        case "enteric":
+            drainageState[image] = 3;
+            break;
+        case "hemorrhagic":
+            drainageState[image] = 4;
     }
 }
