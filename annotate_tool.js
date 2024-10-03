@@ -1,4 +1,4 @@
-var numRows = 3;
+var numRows = 2;
 var numCols = 3;
 var numShownImages = numRows * numCols;
 var currentStartIndex = -numShownImages;
@@ -50,7 +50,6 @@ function nextPage() {
 
         // Update image html, using i to index html elements
         updateItem(image, color, consistency, drainage, i);
-
     }
 
     for (var i = check; i < (check + dummyImages); i++) {
@@ -109,10 +108,17 @@ function downloadLabels() {
         a.download = fileName;
         a.click();
     }
-
-    download(reviewedLabels, 'reviewed_labels.txt', 'text/plain');
+    temp = {};
+    for (let i = 0; i < currentStartIndex; i++) {
+        temp[reviewedLabels[Object.keys(reviewedLabels)[i]][0]] = [
+            reviewedLabels[Object.keys(reviewedLabels)[i]][0], 
+            reviewedLabels[Object.keys(reviewedLabels)[i]][1], 
+            reviewedLabels[Object.keys(reviewedLabels)[i]][2], 
+            reviewedLabels[Object.keys(reviewedLabels)[i]][3]
+        ];
+    }
+    download(temp, 'reviewed_labels.txt', 'text/plain');
 }
-
 
 document.addEventListener('DOMContentLoaded', function() {
     // resumeLabel();
@@ -159,7 +165,6 @@ function createGallery() {
             // Create the border the img is housed in
             const button = document.createElement("button");
             button.id = `zoom-${index}`;
-            // TODO: Change to a zoom function
             button.setAttribute("onclick", `switchZoom(${index})`);
 
             const img = document.createElement("img");
@@ -273,9 +278,7 @@ function createGallery() {
 
             // Append each created col to the row
             row.appendChild(col);
-
         }
-
         // Append the current row to the gallery
         document.getElementById("gallery").appendChild(row);
     }
@@ -293,12 +296,13 @@ function loadLabeler() {
 
 function save() {
     // Saving index, state dictionaries, and reviewed labels to local storage for persistence
-    // localStorage.setItem("currentStartIndex", currentStartIndex);
-    // localStorage.setItem("colorState", JSON.stringify(colorState));
-    // localStorage.setItem("consistencyState", JSON.stringify(consistencyState));
-    // localStorage.setItem("drainageState", JSON.stringify(drainageState));
-    // localStorage.setItem("reviewedLabels", JSON.stringify(reviewedLabels));
+    localStorage.setItem("currentStartIndex", currentStartIndex);
+    localStorage.setItem("colorState", JSON.stringify(colorState));
+    localStorage.setItem("consistencyState", JSON.stringify(consistencyState));
+    localStorage.setItem("drainageState", JSON.stringify(drainageState));
+    localStorage.setItem("reviewedLabels", JSON.stringify(reviewedLabels));
 }
+
 function resume() {
     currentStartIndex = Number(localStorage.getItem("currentStartIndex"));
     colorState = JSON.parse(localStorage.getItem("colorState"));
