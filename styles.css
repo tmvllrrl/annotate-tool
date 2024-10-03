@@ -8,45 +8,6 @@ select {
     color: #333;
 }
 
-/* Basic button styles */
-.button-basic {
-    background-color: #4CAF50; /* Green background */
-    border: none;
-    color: white; /* White text */
-    padding: 12px 24px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    border-radius: 8px;
-    transition: background-color 0.3s ease; /* Smooth hover transition */
-    cursor: pointer;
-}
-  
-/* Hover effect */
-.button-basic:hover {
-    background-color: #45a049; /* Darker green on hover */
-}
-
-/* Flat button */
-.button-flat {
-    background-color: transparent;
-    border: 2px solid #008CBA; /* Blue border */
-    color: #008CBA; /* Blue text */
-    padding: 12px 24px;
-    font-size: 16px;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-  
-  /* Hover effect with border animation */
-  .button-flat:hover {
-    background-color: #008CBA; /* Blue background on hover */
-    color: white; /* White text on hover */
-    border: 2px solid #008CBA; /* Keep the same blue border */
-}
-
 /* Ghost button (transparent) */
 .button-ghost {
     background-color: transparent;
@@ -65,46 +26,6 @@ select {
     background-color: #FF5733; /* Orange background on hover */
     color: white; /* White text on hover */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
-}
-
-/* Neon button */
-.button-neon {
-    background-color: #282828; /* Dark background */
-    color: #00E676; /* Neon green text */
-    padding: 12px 24px;
-    font-size: 16px;
-    border: 2px solid #00E676; /* Neon green border */
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    transition: all 0.4s ease;
-    position: relative;
-    cursor: pointer;
-}
-  
-  /* Neon effect */
-.button-neon::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    border-radius: 6px;
-    background: linear-gradient(45deg, #00E676, #1DE9B6);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-  
-  /* Hover glow effect */
-.button-neon:hover::before {
-    opacity: 1;
-    filter: blur(8px); /* Neon glow */
-}
-  
-.button-neon:hover {
-    color: white;
-    background-color: #00E676; /* Green background */
 }
 
 /* Gradient button */
