@@ -1,5 +1,5 @@
 var numRows = 2;
-var numCols = 3;
+var numCols = 4;
 var numShownImages = numRows * numCols;
 var currentStartIndex = -numShownImages;
 
@@ -7,19 +7,19 @@ var currentStartIndex = -numShownImages;
 var reviewedLabels = {};
 
 for (let i = 0; i < images.length; i++) {
-    // Each entry looks like imageName: [imageName, color, consistency, drainage]
+    // Each entry looks like imageName: [imageName, primary, secondary, notes]
     reviewedLabels[images[i][0]] = [images[i][0], images[i][1], images[1][2], images[i][3]];
 }
 
 // Stores the labeler
 var labeler = "none";
 
-function updateItem(image, color, consistency, drainage, index) {
-    document.getElementById(`image-${index}`).src = 'raw_data/'+image;
+function updateItem(image, primary, secondary, notes, index) {
+    document.getElementById(`image-${index}`).src = `raw_data/${image}`;
     document.getElementById(`image-number-${index}`).innerHTML = `Image #${(currentStartIndex) + index + 1}`; 
-    document.getElementById(`color-label-${index}`).value = color;
-    document.getElementById(`consistency-label-${index}`).value = consistency;
-    document.getElementById(`drainage-label-${index}`).value = drainage;
+    document.getElementById(`primary-label-${index}`).value = primary;
+    document.getElementById(`secondary-label-${index}`).value = secondary;
+    document.getElementById(`notes-label-${index}`).innerHTML = notes;
     document.getElementById(`image-name-${index}`).innerHTML = image;
 }
 
@@ -44,12 +44,12 @@ function nextPage() {
     for (var i = 0; i < realImages; i++) {
 
         var image = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][0];
-        var color = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][1];
-        var consistency = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][2];
-        var drainage = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][3];
+        var primary = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][1];
+        var secondary = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][2];
+        var notes = reviewedLabels[Object.keys(reviewedLabels)[currentStartIndex+i]][3];
 
         // Update image html, using i to index html elements
-        updateItem(image, color, consistency, drainage, i);
+        updateItem(image, primary, secondary, notes, i);
     }
 
     for (var i = check; i < (check + dummyImages); i++) {
@@ -59,31 +59,31 @@ function nextPage() {
     // save();
 }
 
-function switchColorState(index) {
+function switchPrimaryState(index) {
     // Need to get image name to alter reviewed labels
     var image = document.getElementById(`image-name-${index}`).innerHTML;
-    // Getting up-to-date color value
-    var color = document.getElementById(`color-label-${index}`).value;
+    // Getting up-to-date primary value
+    var primary = document.getElementById(`primary-label-${index}`).value;
 
-    reviewedLabels[image][1] = color;
+    reviewedLabels[image][1] = primary;
 }
 
-function switchConsistencyState(index) {
+function switchSecondaryState(index) {
     // Need to get image name to alter reviewed labels
     var image = document.getElementById(`image-name-${index}`).innerHTML;
-    // Getting up-to-date color value
-    var consistency = document.getElementById(`consistency-label-${index}`).value;
+    // Getting up-to-date secondary value
+    var secondary = document.getElementById(`secondary-label-${index}`).value;
 
-    reviewedLabels[image][2] = consistency;
+    reviewedLabels[image][2] = secondary;
 }
 
-function switchDrainageState(index) {
+function saveNotes(index) {
     // Need to get image name to alter reviewed labels
     var image = document.getElementById(`image-name-${index}`).innerHTML;
     // Getting up-to-date color value
-    var drainage = document.getElementById(`drainage-label-${index}`).value;
+    var notes = document.getElementById(`notes-label-${index}`).innerHTML;
 
-    reviewedLabels[image][3] = drainage;
+    reviewedLabels[image][3] = notes;
 }
 
 function switchZoom(index) {
@@ -126,6 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
     loadLabeler();
 }, false);
 
+function rotateImage(index) {
+    img = document.getElementById(`image-${index}`);
+    button = document.getElementById(`zoom-${index}`);
+    var width = img.width;
+    console.log(width);
+    if (width > 200) {
+
+        img.style.transform = "rotate(90deg)";
+        // button.style.transform = "rotate(90deg)";
+        // img.style.height = 200;
+    }
+}
+
 function createGallery() {
 
     for (let i = 0; i < numRows; i++) {
@@ -162,21 +175,15 @@ function createGallery() {
             title.id = `image-number-${index}`;
             title.style.marginBottom = "4px";
 
-            // Create the border the img is housed in
-            const button = document.createElement("button");
-            button.id = `zoom-${index}`;
-            button.setAttribute("onclick", `switchZoom(${index})`);
-
             const img = document.createElement("img");
             img.id = `image-${index}`;
             img.style.height = "200px";
+            img.setAttribute("onclick", `switchZoom(${index})`);
+            // img.setAttribute("onload", `rotateImage(${index})`);
 
-            // Img goes inside the button
-            button.appendChild(img);
-
-            // imageCol order: Title -> Button (contains Image)
+            // imageCol order: Title -> Image
             imageCol.appendChild(title);
-            imageCol.appendChild(button);
+            imageCol.appendChild(img);
 
             // Add imageCol to single item row
             itemRow.appendChild(imageCol);
@@ -186,82 +193,73 @@ function createGallery() {
             const labelCol = document.createElement("div");
             labelCol.setAttribute("class", "col");
 
-            // Color Label
-            var colorLabelValues = ["None", "Serous", "Sanguineous", "Serosanguineous",
+            // Primary Label
+            var primaryLabelValues = ["None", "Serous", "Sanguineous", "Serosanguineous",
                 "Chylous", "Bilious", "Purulent", "Hemorrhagic", "Feculent"
             ];
 
-            const colorLabelSelect = document.createElement("select");
-            colorLabelSelect.setAttribute("onchange", `switchColorState(${index})`);
-            colorLabelSelect.id = `color-label-${index}`;
-            colorLabelSelect.style.marginBottom = "16px";
+            const primaryLabelSelect = document.createElement("select");
+            primaryLabelSelect.setAttribute("onchange", `switchPrimaryState(${index})`);
+            primaryLabelSelect.id = `primary-label-${index}`;
+            primaryLabelSelect.style.marginBottom = "16px";
 
-            for (let i = 0; i < colorLabelValues.length; i++) {
+            for (let i = 0; i < primaryLabelValues.length; i++) {
                 var option = document.createElement("option");
-                option.value = colorLabelValues[i].toLowerCase();
-                option.text = colorLabelValues[i];
-                colorLabelSelect.appendChild(option);
+                option.value = primaryLabelValues[i].toLowerCase();
+                option.text = primaryLabelValues[i];
+                primaryLabelSelect.appendChild(option);
             }
             
-            const colorLabelTitle = document.createElement("span");
-            colorLabelTitle.innerHTML = "Color:"
+            const primaryLabelTitle = document.createElement("span");
+            primaryLabelTitle.innerHTML = "Primary:"
 
-            // Add Color Label items
-            labelCol.appendChild(colorLabelTitle);
+            // Add Primary Label items
+            labelCol.appendChild(primaryLabelTitle);
             labelCol.appendChild(document.createElement("br"));
-            labelCol.appendChild(colorLabelSelect);
+            labelCol.appendChild(primaryLabelSelect);
             labelCol.appendChild(document.createElement("br"));
             
-            // Consistency Label 
-            var consistencyLabelValues = ["None", "Thin/Watery", "Thick/Viscous",
+            // Secondary Label 
+            var secondaryLabelValues = ["None", "Thin/Watery", "Thick/Viscous",
                 "Clotted", "Oily", "Mucous"
             ];
 
-            const consistencyLabelSelect = document.createElement("select");
-            consistencyLabelSelect.setAttribute("onchange", `switchConsistencyState(${index})`);
-            consistencyLabelSelect.id = `consistency-label-${index}`;
-            consistencyLabelSelect.style.marginBottom = "16px";
+            const secondaryLabelSelect = document.createElement("select");
+            secondaryLabelSelect.setAttribute("onchange", `switchSecondaryState(${index})`);
+            secondaryLabelSelect.id = `secondary-label-${index}`;
+            secondaryLabelSelect.style.marginBottom = "16px";
 
-            for (let i = 0; i < consistencyLabelValues.length; i++) {
+            for (let i = 0; i < secondaryLabelValues.length; i++) {
                 var option  = document.createElement("option");
-                option.value = consistencyLabelValues[i].toLowerCase();
-                option.text = consistencyLabelValues[i];
-                consistencyLabelSelect.appendChild(option);
+                option.value = secondaryLabelValues[i].toLowerCase();
+                option.text = secondaryLabelValues[i];
+                secondaryLabelSelect.appendChild(option);
             }
 
-            const consistencyLabelTitle = document.createElement("span");
-            consistencyLabelTitle.innerHTML = "Consistency:"
+            const secondaryLabelTitle = document.createElement("span");
+            secondaryLabelTitle.innerHTML = "Secondary:"
 
-            // Add Consistency Label items
-            labelCol.appendChild(consistencyLabelTitle);
+            // Add secondary Label items
+            labelCol.appendChild(secondaryLabelTitle);
             labelCol.appendChild(document.createElement("br"));
-            labelCol.appendChild(consistencyLabelSelect);
+            labelCol.appendChild(secondaryLabelSelect);
             labelCol.appendChild(document.createElement("br"));
 
-            // Drainage Label
-            var drainageLabelValues = ["None", "Lymphatic", "Biliary", "Pancreatic",
-                "Enteric", "Hemorrhagic",
-            ];
+            // Notes
+            const notesEntry = document.createElement("textarea");
+            notesEntry.setAttribute("onchange", `saveNotes(${index})`);
+            notesEntry.id = `notes-label-${index}`;
+            notesEntry.row = 2;
+            notesEntry.col = 20;
+            notesEntry.style.marginBottom = "16px";
 
-            const drainageLabelSelect = document.createElement("select");
-            drainageLabelSelect.setAttribute("onchange", `switchDrainageState(${index})`);
-            drainageLabelSelect.id = `drainage-label-${index}`;
-            drainageLabelSelect.style.marginBottom = "16px";
+            const notesLabelTitle = document.createElement("span");
+            notesLabelTitle.innerHTML = "Notes:";
 
-            for (let i = 0; i < drainageLabelValues.length; i++) {
-                var option = document.createElement("option");
-                option.value = drainageLabelValues[i].toLowerCase();
-                option.text = drainageLabelValues[i];
-                drainageLabelSelect.appendChild(option);
-            }
-
-            const drainageLabelTitle = document.createElement("span");
-            drainageLabelTitle.innerHTML = "Drainage:";
-
-            // Add Drainage Label items
-            labelCol.appendChild(drainageLabelTitle);
+            // Add Notes Label items
+            labelCol.appendChild(notesLabelTitle);
             labelCol.appendChild(document.createElement("br"));
-            labelCol.appendChild(drainageLabelSelect);
+            labelCol.appendChild(notesEntry);
             labelCol.appendChild(document.createElement("br"));
 
             // Create the name; used for storing reviewed labels
@@ -297,17 +295,11 @@ function loadLabeler() {
 function save() {
     // Saving index, state dictionaries, and reviewed labels to local storage for persistence
     localStorage.setItem("currentStartIndex", currentStartIndex);
-    localStorage.setItem("colorState", JSON.stringify(colorState));
-    localStorage.setItem("consistencyState", JSON.stringify(consistencyState));
-    localStorage.setItem("drainageState", JSON.stringify(drainageState));
     localStorage.setItem("reviewedLabels", JSON.stringify(reviewedLabels));
 }
 
 function resume() {
     currentStartIndex = Number(localStorage.getItem("currentStartIndex"));
-    colorState = JSON.parse(localStorage.getItem("colorState"));
-    consistencyState = JSON.parse(localStorage.getItem("consistencyState"));
-    drainageState = JSON.parse(localStorage.getItem("drainageState"));
     reviewedLabels = JSON.parse(localStorage.getItem("reviewedLabels"));
 }
 
@@ -321,7 +313,7 @@ function prevPage() {
 // OBSOLETE COMPONENTS /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Dictionary containing (imageName: state) pairs for color label
+ * Dictionary containing (imageName: state) pairs for primary label
  * 
  * State number: Label
  * 0: serous
@@ -334,10 +326,10 @@ function prevPage() {
  * 7: feculent
  * 
  */
-var colorState = {};
+var primaryState = {};
 
 /**
- * Dictionary containing (imageName: state) pairs for consistency label
+ * Dictionary containing (imageName: state) pairs for secondary label
  * 
  * State number: Label
  * 0: thin/watery
@@ -347,83 +339,51 @@ var colorState = {};
  * 4: mucous
  * 
  */
-var consistencyState = {};
+var secondaryState = {};
 
-/**
- * Dictionary containing (imageName: state) pairs for drainage label
- * 
- * State number: Label
- * 0: lymphatic
- * 1: biliary
- * 2: pancreatic
- * 3: enteric
- * 4: hemorrhagic
- * 
- */
-var drainageState = {};
-
-function setColorState(color, image) {
-    switch(color) {
+function setprimaryState(primary, image) {
+    switch(primary) {
         case "serous":
-            colorState[image] = 0;
+            primaryState[image] = 0;
             break;
         case "sanguineous":
-            colorState[image] = 1;
+            primaryState[image] = 1;
             break;
         case "serosanguineous":
-            colorState[image] = 2;
+            primaryState[image] = 2;
             break;
         case "chylous":
-            colorState[image] = 3;
+            primaryState[image] = 3;
             break;
         case "bilious":
-            colorState[image] = 4;
+            primaryState[image] = 4;
             break;
         case "purulent":
-            colorState[image] = 5;
+            primaryState[image] = 5;
             break;
         case "hemorrhagic":
-            colorState[image] = 6;
+            primaryState[image] = 6;
             break;
         case "feculent":
-            colorState[image] = 7;
+            primaryState[image] = 7;
     }
 }
 
-function setConsistencyState(consistency, image) {
-    switch(consistency) {
+function setsecondaryState(secondary, image) {
+    switch(secondary) {
         case "thin/watery":
-            consistencyState[image] = 0;
+            secondaryState[image] = 0;
             break;
         case "thick/viscous":
-            consistencyState[image] = 1;
+            secondaryState[image] = 1;
             break;
         case "clotted":
-            consistencyState[image] = 2;
+            secondaryState[image] = 2;
             break;
         case "oily":
-            consistencyState[image] = 3;
+            secondaryState[image] = 3;
             break;
         case "mucous":
-            consistencyState[image] = 4;
-    }
-}
-
-function setDrainageState(drainage, image) {
-    switch(drainage) {
-        case "lymphatic":
-            drainageState[image] = 0;
-            break;
-        case "biliary":
-            drainageState[image] = 1;
-            break;
-        case "pancreatic":
-            drainageState[image] = 2;
-            break;
-        case "enteric":
-            drainageState[image] = 3;
-            break;
-        case "hemorrhagic":
-            drainageState[image] = 4;
+            secondaryState[image] = 4;
     }
 }

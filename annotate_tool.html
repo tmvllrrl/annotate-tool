@@ -23,13 +23,12 @@
 		<div class="row">
 			<div class="col-sm" style="background-color: #c1c6fc; border-radius: 5px; height: fit-content;">
 				Instructions:
-				<br>
-				Click on image to change border to correct classification.
-				<br>
-				Border Legend:
-				<span style="color: red; font-size: x-large;">■</span> Blood
-				<span style="color: gold; font-size: x-large;">■</span> Bile
-	
+				<ol>
+					<li>Select what experience level you have.</li>
+					<li>Revew each primary and secondary labels and notes for each image.</li>
+					<li>Remember to download reviewed labels after you're done.</li>
+				</ol>
+				Can click on an image to zoom in.
 			</div>
 
 			<div class="col-sm"></div>
@@ -38,13 +37,17 @@
 		<br>
 
 		<div class="row">
-			<p>
-				<select name="labeler" id="labeler" onchange="saveLabeler()">
-					<option value="none">Select Experience Level</option>
-					<option value="doctor">Doctor</option>
-					<option value="student">Student</option>
-				</select>
-			</p>
+			<div class="col">
+				Experience Level:
+				<br>
+				<p>
+					<select name="labeler" id="labeler" onchange="saveLabeler()">
+						<option value="none">Select Experience Level</option>
+						<option value="doctor">Doctor</option>
+						<option value="student">Student</option>
+					</select>
+				</p>
+			</div>
 		</div>
 
 		<div id="gallery" style="padding-bottom: 2px;">
